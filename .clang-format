@@ -1,9 +1,9 @@
-# Commented out parameters are those with the same value as base LLVM style.
+# Commented out parameters are those with the same value as base Microsoft style.
 # We can uncomment them if we want to change their value, or enforce the
 # chosen value in case the base style changes (last sync: Clang 14.0).
 ---
 ### General config, applies to all languages ###
-BasedOnStyle:  LLVM
+BasedOnStyle:  Microsoft
 AccessModifierOffset: -4
 AlignAfterOpenBracket: DontAlign
 # AlignArrayOfStructures: None
@@ -109,7 +109,7 @@ KeepEmptyLinesAtTheStartOfBlocks: false
 # MacroBlockBegin: ''
 # MacroBlockEnd:   ''
 # MaxEmptyLinesToKeep: 1
-# NamespaceIndentation: None
+NamespaceIndentation: All
 # PenaltyBreakAssignment: 2
 # PenaltyBreakBeforeFirstCallParameter: 19
 # PenaltyBreakComment: 300
@@ -120,7 +120,7 @@ KeepEmptyLinesAtTheStartOfBlocks: false
 # PenaltyExcessCharacter: 1000000
 # PenaltyReturnTypeOnItsOwnLine: 60
 # PenaltyIndentedWhitespace: 0
-# PointerAlignment: Right
+PointerAlignment: Left
 # PPIndentWidth:   -1
 # ReferenceAlignment: Pointer
 # ReflowComments:  true

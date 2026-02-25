@@ -5,7 +5,7 @@ import sys
 from methods import print_error
 
 
-libname = "EXTENSION-NAME"
+libname = "Magnesium"
 projectdir = "project"
 
 localEnv = Environment(tools=["default"], PLATFORM="")
@@ -38,7 +38,9 @@ Run the following command to download godot-cpp:
 env = SConscript("godot-cpp/SConstruct", {"env": env, "customs": customs})
 
 env.Append(CPPPATH=["src/"])
-sources = Glob("src/*.cpp")
+sources = Glob("src/*.cpp") + Glob("src/fsm/*.cpp")
+# sources = [s for s in all_sources if "src/gen/" not in str(s)]
+print("SOURCES:", sources)
 
 if env["target"] in ["editor", "template_debug"]:
     try:
