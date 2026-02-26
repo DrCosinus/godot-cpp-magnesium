@@ -9,5 +9,7 @@ namespace magnesium::fsm
 		// ClassDB::class_set_property
 		ClassDB::bind_method(D_METHOD("get_value"), &context::get_value); 
 		ClassDB::bind_method(D_METHOD("set_value", "value"), &context::set_value);
+
+		ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "value"), "set_value", "get_value");
 	}
 } //namespace magnesium::fsm

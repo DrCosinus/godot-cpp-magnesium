@@ -4,8 +4,20 @@
 
 // #include "godot_cpp/core/class_db.hpp"
 #include "godot_cpp/variant/string_name.hpp"
+#include "godot_cpp/classes/script.hpp"
 
 using namespace godot;
+
+StringName get_state_name(Object *obj)
+{
+	if (!obj)
+	{
+		return "None";
+	}
+	Script *script = static_cast<Script*>(static_cast<Object*>(obj->get_script()));
+	return script ? script->get_global_name() : StringName{ obj->get_class() };
+	// print_line(vformat("Class name: %s", obj->get_class()));
+}
 
 namespace magnesium::fsm
 {
@@ -20,7 +32,7 @@ namespace magnesium::fsm
 		static StringName update_method_name{ "update" };
 		if (current_state && current_state->has_method(update_method_name))
 		{
-			current_state->call(update_method_name, p_context, delta);
+			current_state->GDVIRTUAL_CALL(update, p_context, delta);
 		}
 	}
 
@@ -28,6 +40,7 @@ namespace magnesium::fsm
 	{
 		// static StringName exit_method_name{ "exit" };
 		// static StringName enter_method_name{ "enter" };
+		print_line(vformat("Machine travel from state '%s' to state '%s'", get_state_name(current_state), get_state_name(new_state)));
 		if (current_state)
 		{
 			current_state->GDVIRTUAL_CALL(exit, p_context);

@@ -19,7 +19,7 @@ void initialize_gdextension_types(ModuleInitializationLevel p_level)
 		return;
 	}
 	GDREGISTER_CLASS(ExampleClass);
-	GDREGISTER_ABSTRACT_CLASS(magnesium::fsm::state);
+	GDREGISTER_CLASS(magnesium::fsm::state);
 	GDREGISTER_CLASS(magnesium::fsm::context);
 	GDREGISTER_CLASS(magnesium::fsm::machine);
 }

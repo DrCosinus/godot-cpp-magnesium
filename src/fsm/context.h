@@ -16,8 +16,8 @@ namespace magnesium::fsm
 		context() = default;
 		~context() = default;
 
-		int value{ 0 };
-		int get_value() const { return value; }
-		void set_value(int new_value) { value = new_value; }
+		double value{ 0.0 };
+		double get_value() const { return value; }
+		void set_value(double new_value) { value = new_value; }
 	};
 } //namespace magnesium::fsm
