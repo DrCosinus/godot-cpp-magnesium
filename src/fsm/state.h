@@ -2,12 +2,17 @@
 
 #include "godot_cpp/classes/ref_counted.hpp"
 #include "godot_cpp/classes/wrapped.hpp"
-// #include "godot_cpp/variant/variant.hpp"
-#include "godot_cpp/classes/wrapped.hpp"
+
+// #include "godot_cpp/core/binder_common.hpp"
+// #include "godot_cpp/core/gdvirtual.gen.inc"
+
+#include "context.h"
+
+// using namespace godot;
 
 namespace magnesium::fsm
 {
-	class context;
+	// class context;
 
 	class state : public godot::RefCounted
 	{
@@ -18,8 +23,9 @@ namespace magnesium::fsm
 
 	public:
 		~state() override = default;
-		virtual void enter(context* context) = 0;
-		virtual void exit(context* context) = 0;
-		virtual void update(context* context, float delta) = 0;
+
+		// virtual void enter(context* context) = 0;
+		// virtual void exit(context* context) = 0;
+		// virtual void update(context* context, float delta) = 0;
 	};
 } //namespace magnesium::fsm

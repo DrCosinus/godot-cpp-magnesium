@@ -1,6 +1,6 @@
 #include "machine.h"
-#include "state.h"
 #include "context.h"
+#include "state.h"
 
 // #include "godot_cpp/core/class_db.hpp"
 #include "godot_cpp/variant/string_name.hpp"
@@ -30,14 +30,14 @@ namespace magnesium::fsm
 		// static StringName enter_method_name{ "enter" };
 		if (current_state)
 		{
-			current_state->exit(p_context);
+			current_state->GDVIRTUAL_CALL(exit, p_context);
 		}
 
 		current_state = new_state;
 
 		if (current_state)
 		{
-			current_state->enter(p_context);
+			current_state->GDVIRTUAL_CALL(enter, p_context);
 		}
 	}
 } //namespace magnesium::fsm

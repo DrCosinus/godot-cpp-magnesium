@@ -6,10 +6,10 @@ func _ready() -> void:
 	example.print_type(example)
 	pass
 	var c := context.new()
-	var s := plop.new()
+	var s := state.new()
 	s.enter(c)
-	s.update(c, 0.016)
-	s.exit(c)
+	#s.update(c, 0.016)
+	#s.exit(c)
 	
 	var m := machine.new()
 	m.travel_to(c,s)
