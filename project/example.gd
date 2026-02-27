@@ -1,21 +1,22 @@
 extends Node
 
+var mac: example_machine
+var ctx: example_context
+var state_init: example_state_init
 
 func _ready() -> void:
 	var example := ExampleClass.new()
 	example.print_type(example)
-	pass
-	var c := context.new()
-	var s := plop.new()
-	#s.enter(c)
-	#s.update(c, 0.016)
-	#s.exit(c)
+
+	ctx = example_context.new()
+	state_init = example_state_init.new()
 	
-	var m := machine.new()
-	m.travel_to(c,s)
+	mac = example_machine.new()
+	mac.changed.connect(on_state_changed)
+	mac.travel_to(ctx,state_init)
 	
-	m.update(c, 0.016)
-	m.update(c, 0.016)
-	m.update(c, 0.016)
-	
-	
+func _process(delta: float) -> void:
+	mac.update(ctx, delta)
+
+func on_state_changed(_p_state: state, _p_context: context):
+	print("changed signal: %s" % _p_state.get_class())

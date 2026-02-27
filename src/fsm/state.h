@@ -1,31 +1,36 @@
 #pragma once
 
+#include "godot_cpp/classes/object.hpp"
 #include "godot_cpp/classes/ref_counted.hpp"
 #include "godot_cpp/classes/wrapped.hpp"
 
 // #include "godot_cpp/core/binder_common.hpp"
 #include "godot_cpp/core/gdvirtual.gen.inc"
 
-#include "context.h"
+// #include "context.h"
+// #include "machine.h"
 
 // using namespace godot;
 
 namespace magnesium::fsm
 {
 	// class context;
+	// class machine;
 
 	class state : public godot::RefCounted
 	{
 		GDCLASS(state, godot::RefCounted);
 		static const auto METHOD_FLAG_VIRTUAL = godot::METHOD_FLAG_VIRTUAL;
+		static const auto METHOD_FLAG_VIRTUAL_REQUIRED = godot::METHOD_FLAG_VIRTUAL_REQUIRED;
+
 	protected:
 		static void _bind_methods();
 
 	public:
 		~state() override = default;
 
-		GDVIRTUAL1(enter, context*);
-		GDVIRTUAL1(exit, context*);
-		GDVIRTUAL2(update, context*, float);
+		GDVIRTUAL1(enter, godot::Object*);
+		GDVIRTUAL1(exit, godot::Object*);
+		GDVIRTUAL2_REQUIRED(update, godot::Object*, float);
 	};
 } //namespace magnesium::fsm

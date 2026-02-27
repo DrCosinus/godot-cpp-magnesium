@@ -6,7 +6,6 @@
 namespace magnesium::fsm
 {
 	class state;
-	class context;
 
 	class machine : public godot::RefCounted
 	{
@@ -19,9 +18,14 @@ namespace magnesium::fsm
 		machine() = default;
 		~machine() = default;
 
-		void update(context* p_context, float delta);
+		void update(godot::Object* p_context, float delta);
 
-		void travel_to(context* p_context, state* new_state);
+		void travel_to(godot::Object* p_context, state* new_state);
+
+		state* get_current_state() const
+		{
+			return current_state;
+		}
 
 	private:
 		state* current_state{ nullptr };
