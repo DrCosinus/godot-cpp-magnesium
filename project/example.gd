@@ -1,8 +1,9 @@
-extends Node
+extends Node2D
 
 var mac: example_machine
 var ctx: example_context
 var state_init: example_state_init
+var font := ThemeDB.fallback_font
 
 func _ready() -> void:
 	var example := ExampleClass.new()
@@ -13,10 +14,18 @@ func _ready() -> void:
 	
 	mac = example_machine.new()
 	mac.changed.connect(on_state_changed)
+	print("before %s" % [ mac.current_state.get_class_name() if mac.current_state else &"None" ])
 	mac.travel_to(ctx,state_init)
-	
+	print("after %s" % mac.current_state.get_class_name())
+
 func _process(delta: float) -> void:
 	mac.update(ctx, delta)
+	queue_redraw()
 
-func on_state_changed(_p_state: state, _p_context: context):
+func on_state_changed(_p_state: state, _p_context: Object):
 	print("changed signal: %s" % _p_state.get_class())
+
+func _draw() -> void:
+	draw_string(font, Vector2(4,20), "Frame count: %d" % ctx.counter)
+	draw_string(font, Vector2(4,20+16), "Timer: %f" % ctx.time)
+	

@@ -33,12 +33,16 @@ namespace magnesium::fsm
 		ClassDB::bind_method(D_METHOD("travel_to", "context", "new_state"), &machine::travel_to);
 		ClassDB::bind_method(D_METHOD("get_current_state"), &machine::get_current_state);
 
+		// ADD_SIGNAL(MethodInfo(
+		// 		get_changed_signal_name(),
+		// 		PropertyInfo(Variant::OBJECT, "from", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_DEFAULT, "state"),
+		// 		PropertyInfo(Variant::OBJECT, "p_context")));
 		ADD_SIGNAL(MethodInfo(
 				get_changed_signal_name(),
-				PropertyInfo(Variant::OBJECT, "from", PROPERTY_HINT_OBJECT_ID, "state"),
-				PropertyInfo(Variant::OBJECT, "p_context", PROPERTY_HINT_OBJECT_ID, "context")));
+				PropertyInfo(Variant::OBJECT, "from", PROPERTY_HINT_TYPE_STRING, "state"),
+				PropertyInfo(Variant::OBJECT, "p_context")));
 
-		ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "current_state", PROPERTY_HINT_INT_IS_POINTER, "state"), "", "get_current_state");
+		ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "current_state", PROPERTY_HINT_TYPE_STRING, "state"), "", "get_current_state");
 	}
 
 	void machine::update(Object* p_context, float delta)

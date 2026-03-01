@@ -29,6 +29,7 @@ namespace magnesium::fsm
 	public:
 		~state() override = default;
 
+		godot::StringName get_class_name() const;
 		GDVIRTUAL1(enter, godot::Object*);
 		GDVIRTUAL1(exit, godot::Object*);
 		GDVIRTUAL2_REQUIRED(update, godot::Object*, float);
