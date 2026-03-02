@@ -3,6 +3,7 @@
 #include "state.h"
 
 // #include "godot_cpp/core/class_db.hpp"
+#include "godot_cpp/classes/engine.hpp"
 #include "godot_cpp/classes/script.hpp"
 #include "godot_cpp/variant/string_name.hpp"
 
@@ -16,7 +17,6 @@ StringName get_state_name(Object* obj)
 	}
 	Script* script = static_cast<Script*>(static_cast<Object*>(obj->get_script()));
 	return script ? script->get_global_name() : StringName{ obj->get_class() };
-	// print_line(vformat("Class name: %s", obj->get_class()));
 }
 
 namespace magnesium::fsm
@@ -32,6 +32,7 @@ namespace magnesium::fsm
 		ClassDB::bind_method(D_METHOD("update", "context", "delta"), &machine::update);
 		ClassDB::bind_method(D_METHOD("travel_to", "context", "new_state"), &machine::travel_to);
 		ClassDB::bind_method(D_METHOD("get_current_state"), &machine::get_current_state);
+		// GDREGISTER_FUNCTION("get_current_state", &machine::get_current_state);
 
 		// ADD_SIGNAL(MethodInfo(
 		// 		get_changed_signal_name(),
@@ -41,6 +42,7 @@ namespace magnesium::fsm
 				get_changed_signal_name(),
 				PropertyInfo(Variant::OBJECT, "from", PROPERTY_HINT_TYPE_STRING, "state"),
 				PropertyInfo(Variant::OBJECT, "p_context")));
+		ClassDB::get_method(get_class_static(), "update");
 
 		ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "current_state", PROPERTY_HINT_TYPE_STRING, "state"), "", "get_current_state");
 	}

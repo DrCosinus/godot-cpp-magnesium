@@ -5,10 +5,12 @@
 #include <godot_cpp/core/defs.hpp>
 #include <godot_cpp/godot.hpp>
 
+// magnesium includes
 #include "example_class.h"
+#include "fsm/context.h"
 #include "fsm/machine.h"
 #include "fsm/state.h"
-#include "fsm/context.h"
+#include "utils/utils.h"
 
 using namespace godot;
 
@@ -22,6 +24,7 @@ void initialize_gdextension_types(ModuleInitializationLevel p_level)
 	GDREGISTER_CLASS(magnesium::fsm::state);
 	GDREGISTER_CLASS(magnesium::fsm::context);
 	GDREGISTER_CLASS(magnesium::fsm::machine);
+	GDREGISTER_CLASS(magnesium::utils::MgUtils);
 }
 
 void uninitialize_gdextension_types(ModuleInitializationLevel p_level)
@@ -35,7 +38,7 @@ void uninitialize_gdextension_types(ModuleInitializationLevel p_level)
 extern "C"
 {
 	// Initialization
-	GDExtensionBool GDE_EXPORT magnesium_library_init(GDExtensionInterfaceGetProcAddress p_get_proc_address, GDExtensionClassLibraryPtr p_library, GDExtensionInitialization *r_initialization)
+	GDExtensionBool GDE_EXPORT magnesium_library_init(GDExtensionInterfaceGetProcAddress p_get_proc_address, GDExtensionClassLibraryPtr p_library, GDExtensionInitialization* r_initialization)
 	{
 		GDExtensionBinding::InitObject init_obj(p_get_proc_address, p_library, r_initialization);
 		init_obj.register_initializer(initialize_gdextension_types);

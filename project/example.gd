@@ -15,6 +15,9 @@ func _ready() -> void:
 	mac = example_machine.new()
 	mac.changed.connect(on_state_changed)
 	print("before %s" % [ mac.current_state.get_class_name() if mac.current_state else &"None" ])
+	print("try_call_method// null object ", MgUtils.try_call_method(null, &"hello_world"))
+	print("try_call_method// ok ", MgUtils.try_call_method(ctx, &"hello_world"))
+	print("try_call_method// invalid method name ", MgUtils.try_call_method(ctx, &"hello_world2"))
 	mac.travel_to(ctx,state_init)
 	print("after %s" % mac.current_state.get_class_name())
 
