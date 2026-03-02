@@ -52,6 +52,7 @@ compile_commands.json
 # VSCode
 .vscode/*
 !.vscode/extensions.json
+!.vscode/settings.json
 .DS_Store
 
 # Jetbrains
