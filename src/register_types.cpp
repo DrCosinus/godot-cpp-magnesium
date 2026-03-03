@@ -4,6 +4,7 @@
 #include <godot_cpp/core/class_db.hpp>
 #include <godot_cpp/core/defs.hpp>
 #include <godot_cpp/godot.hpp>
+#include <godot_cpp/classes/engine.hpp>
 
 // magnesium includes
 #include "example_class.h"
@@ -24,7 +25,10 @@ void initialize_gdextension_types(ModuleInitializationLevel p_level)
 	GDREGISTER_CLASS(magnesium::fsm::state);
 	GDREGISTER_CLASS(magnesium::fsm::context);
 	GDREGISTER_CLASS(magnesium::fsm::machine);
-	GDREGISTER_CLASS(magnesium::utils::MgUtils);
+	GDREGISTER_CLASS(magnesium::utils::utils);
+	using namespace magnesium::utils;
+	InstanceProvider<utils>::create_instance();
+	Engine::get_singleton()->register_singleton("MgUtils", InstanceProvider<utils>::instance());
 }
 
 void uninitialize_gdextension_types(ModuleInitializationLevel p_level)
@@ -33,6 +37,9 @@ void uninitialize_gdextension_types(ModuleInitializationLevel p_level)
 	{
 		return;
 	}
+	using namespace magnesium::utils;
+	Engine::get_singleton()->unregister_singleton("MgUtils");
+	InstanceProvider<utils>::destroy_instance();
 }
 
 extern "C"

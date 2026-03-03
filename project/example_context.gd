@@ -3,6 +3,6 @@ class_name example_context
 var counter : int
 var time : float
 
-func hello_world():
-	print("Hello World")
+func hello_world(name: String):
+	print("Hello World, %s" % name)
 	return 509
