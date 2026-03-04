@@ -1,6 +1,7 @@
 #include "machine.h"
 #include "context.h"
 #include "state.h"
+#include "godot_cpp_ex.hpp"
 
 // #include "godot_cpp/core/class_db.hpp"
 #include "godot_cpp/classes/engine.hpp"
@@ -55,7 +56,7 @@ namespace magnesium::fsm
 		auto current_state = get_current_state(p_context);
 		if (current_state)
 		{
-			current_state.call_static(Variant::OBJECT, "update", p_context, delta);
+			GodotEx::VariantEx::call_static(current_state, Variant::OBJECT, "update", p_context, delta);
 			// GDVIRTUAL_CALL_PTR(current_state, update, p_context, delta);
 		}
 	}
@@ -71,7 +72,7 @@ namespace magnesium::fsm
 		print_line(vformat("Machine travel from state '%s' to state '%s'", get_state_name(current_state), get_state_name(new_state)));
 		if (current_state)
 		{
-			current_state.call_static(Variant::OBJECT, StringName{ "exit" }, p_context);
+			GodotEx::VariantEx::call_static(current_state, Variant::OBJECT, "exit", p_context);
 			// GDVIRTUAL_CALL_PTR(current_state, exit, p_context);
 		}
 
@@ -79,7 +80,7 @@ namespace magnesium::fsm
 
 		if (new_state)
 		{
-			new_state.call_static(Variant::OBJECT, StringName{ "enter" }, p_context);
+			GodotEx::VariantEx::call_static(new_state, Variant::OBJECT, "enter", p_context);
 			// GDVIRTUAL_CALL_PTR(new_state, enter, p_context);
 		}
 		emit_signal("changed", new_state, p_context);
