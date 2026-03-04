@@ -6,7 +6,7 @@
 
 using namespace godot;
 
-namespace magnesium::utils
+namespace magnesium
 {
 	void utils::_bind_methods()
 	{
@@ -29,7 +29,7 @@ namespace magnesium::utils
 		print_line(vformat("Type: %d", p_variant.get_type()));
 	}
 
-	Variant utils::try_call_method(const Variant **args, GDExtensionInt arg_count, GDExtensionCallError &error)
+	Variant utils::try_call_method(const Variant** args, GDExtensionInt arg_count, GDExtensionCallError& error)
 	{
 		if (arg_count < 2)
 		{
@@ -67,9 +67,9 @@ namespace magnesium::utils
 		}
 		return obj ? obj->callv(method_name, arr) : Variant{};
 #else
-		array_view<const Variant*> arr{args, arg_count};
+		array_view<const Variant*> arr{ args, arg_count };
 		arr.skip(2);
 		return obj ? obj->callv(method_name, arr.to_array()) : Variant{};
 #endif
 	}
-} //namespace magnesium::utils
+} //namespace magnesium

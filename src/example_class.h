@@ -23,6 +23,6 @@ public:
 	ExampleClass() = default;
 	~ExampleClass() override = default;
 
-	void print_type(const Variant &p_variant) const;
-	auto try_get_method(Object *obj, const StringName &method_name) const -> Callable;
+	void print_type(const Variant& p_variant) const;
+	// auto try_get_method(Object *obj, const StringName &method_name) const -> Callable;
 };

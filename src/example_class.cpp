@@ -9,7 +9,7 @@ void ExampleClass::_bind_methods()
 	ADD_SIGNAL(MethodInfo(get_signal_name(), PropertyInfo(Variant::OBJECT, "node"), PropertyInfo(Variant::VECTOR2, "new_pos")));
 }
 
-void ExampleClass::print_type(const Variant &p_variant) const
+void ExampleClass::print_type(const Variant& p_variant) const
 {
 	print_line(vformat("Type: %d", p_variant.get_type()));
 }

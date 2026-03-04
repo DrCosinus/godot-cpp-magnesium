@@ -7,34 +7,8 @@
 #include "godot_cpp/variant/variant.hpp"
 #include <type_traits>
 
-namespace magnesium::utils
+namespace magnesium
 {
-	template <typename T>
-	class InstanceProvider
-	{
-	public:
-		static T*& instance()
-		{
-			static T* instance{ nullptr };
-			return instance;
-		}
-		static void create_instance()
-		{
-			if (!instance())
-			{
-				instance() = memnew(T);
-			}
-		}
-		static void destroy_instance()
-		{
-			if (instance())
-			{
-				memdelete(instance());
-				instance() = nullptr;
-			}
-		}
-	};
-
 	class utils : public godot::Object
 	{
 		GDCLASS(utils, Object)
@@ -46,10 +20,10 @@ namespace magnesium::utils
 		utils() = default;
 		~utils() override = default;
 
-		static utils* create_singleton()
-		{
-			return memnew(utils);
-		}
+		// static utils* create_singleton()
+		// {
+		// 	return memnew(utils);
+		// }
 
 		void print_type(const godot::Variant& p_variant) const;
 		godot::Variant try_call_method(const godot::Variant** args, GDExtensionInt arg_count, GDExtensionCallError& error);
@@ -97,4 +71,4 @@ namespace magnesium::utils
 			return arr;
 		}
 	};
-} // namespace magnesium::utils
+} // namespace magnesium

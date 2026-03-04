@@ -1,17 +1,18 @@
 #include "register_types.h"
 
 #include <gdextension_interface.h>
+#include <godot_cpp/classes/engine.hpp>
 #include <godot_cpp/core/class_db.hpp>
 #include <godot_cpp/core/defs.hpp>
 #include <godot_cpp/godot.hpp>
-#include <godot_cpp/classes/engine.hpp>
 
 // magnesium includes
 #include "example_class.h"
 #include "fsm/context.h"
 #include "fsm/machine.h"
 #include "fsm/state.h"
-#include "utils/utils.h"
+#include "magnesium/instance_provider.hpp"
+#include "magnesium/utils.h"
 
 using namespace godot;
 
@@ -22,13 +23,23 @@ void initialize_gdextension_types(ModuleInitializationLevel p_level)
 		return;
 	}
 	GDREGISTER_CLASS(ExampleClass);
-	GDREGISTER_CLASS(magnesium::fsm::state);
-	GDREGISTER_CLASS(magnesium::fsm::context);
-	GDREGISTER_CLASS(magnesium::fsm::machine);
-	GDREGISTER_CLASS(magnesium::utils::utils);
-	using namespace magnesium::utils;
-	InstanceProvider<utils>::create_instance();
-	Engine::get_singleton()->register_singleton("MgUtils", InstanceProvider<utils>::instance());
+
+	{
+		using namespace magnesium;
+		{
+			using namespace fsm;
+			// GDREGISTER_CLASS(state);
+			// GDREGISTER_CLASS(context);
+			GDREGISTER_CLASS(machine);
+			InstanceProvider<machine>::create_instance();
+			Engine::get_singleton()->register_singleton("MgFsmMachine", InstanceProvider<machine>::instance());
+		}
+		{
+			GDREGISTER_CLASS(utils);
+			InstanceProvider<utils>::create_instance();
+			Engine::get_singleton()->register_singleton("MgUtils", InstanceProvider<utils>::instance());
+		}
+	}
 }
 
 void uninitialize_gdextension_types(ModuleInitializationLevel p_level)
@@ -37,9 +48,18 @@ void uninitialize_gdextension_types(ModuleInitializationLevel p_level)
 	{
 		return;
 	}
-	using namespace magnesium::utils;
-	Engine::get_singleton()->unregister_singleton("MgUtils");
-	InstanceProvider<utils>::destroy_instance();
+	{
+		using namespace magnesium;
+		{
+			// Engine::get_singleton()->unregister_singleton("MgUtils");
+			InstanceProvider<utils>::destroy_instance();
+		}
+		{
+			using namespace fsm;
+			// Engine::get_singleton()->unregister_singleton("MgFsmMachine");
+			InstanceProvider<machine>::destroy_instance();
+		}
+	}
 }
 
 extern "C"
