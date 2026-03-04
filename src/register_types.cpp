@@ -28,8 +28,6 @@ void initialize_gdextension_types(ModuleInitializationLevel p_level)
 		using namespace magnesium;
 		{
 			using namespace fsm;
-			// GDREGISTER_CLASS(state);
-			// GDREGISTER_CLASS(context);
 			GDREGISTER_CLASS(machine);
 			InstanceProvider<machine>::create_instance();
 			Engine::get_singleton()->register_singleton("MgFsmMachine", InstanceProvider<machine>::instance());
@@ -51,13 +49,13 @@ void uninitialize_gdextension_types(ModuleInitializationLevel p_level)
 	{
 		using namespace magnesium;
 		{
-			// Engine::get_singleton()->unregister_singleton("MgUtils");
-			InstanceProvider<utils>::destroy_instance();
+			Engine::get_singleton()->unregister_singleton("MgUtils");
+			InstanceProvider<utils>::release_instance();
 		}
 		{
 			using namespace fsm;
-			// Engine::get_singleton()->unregister_singleton("MgFsmMachine");
-			InstanceProvider<machine>::destroy_instance();
+			Engine::get_singleton()->unregister_singleton("MgFsmMachine");
+			InstanceProvider<machine>::release_instance();
 		}
 	}
 }

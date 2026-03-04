@@ -8,8 +8,6 @@
 
 namespace magnesium::fsm
 {
-	class state;
-
 	class machine : public godot::RefCounted
 	{
 		GDCLASS(machine, godot::RefCounted)
@@ -24,30 +22,30 @@ namespace magnesium::fsm
 
 		void update(godot::Object* p_context, float delta);
 
-		void travel_to(godot::Object* p_context, const godot::Variant& new_state);
+		void travel_to(godot::Object* p_context, STATE_BASE_TYPE* new_state);
 
-		godot::Variant get_current_state(godot::Object* p_context)
+		STATE_BASE_TYPE* get_current_state(godot::Object* p_context) const
 		{
 			auto it = context_state_map.find(p_context);
-			return it != context_state_map.end() ? it->second : godot::Variant();
+			return it != context_state_map.end() ? it->second : nullptr;
 		}
-		godot::StringName get_state_name(const godot::Variant& state);
-		godot::StringName get_current_state_name(godot::Object* p_context);
-		void set_current_state(godot::Object* p_context, const godot::Variant& new_state)
+		godot::StringName get_state_name(const STATE_BASE_TYPE* state) const;
+		godot::StringName get_current_state_name(godot::Object* p_context) const;
+		void set_current_state(godot::Object* p_context, STATE_BASE_TYPE* new_state)
 		{
 			context_state_map[p_context] = new_state;
 		}
-		STATE_BASE_TYPE* Variant2State(const godot::Variant& state)
-		{
-			if (!state || state.get_type() != godot::Variant::OBJECT)
-			{
-				return nullptr;
-			}
-			godot::Object* state_obj{ state };
-			return godot::Object::cast_to<STATE_BASE_TYPE>(state_obj);
-		}
+		// STATE_BASE_TYPE* Variant2State(const godot::Variant& state)
+		// {
+		// 	if (!state || state.get_type() != godot::Variant::OBJECT)
+		// 	{
+		// 		return nullptr;
+		// 	}
+		// 	godot::Object* state_obj{ state };
+		// 	return godot::Object::cast_to<STATE_BASE_TYPE>(state_obj);
+		// }
 
 	private:
-		StlMap<godot::Object*, godot::Variant> context_state_map;
+		StlMap<godot::Object*, STATE_BASE_TYPE*> context_state_map;
 	};
 } //namespace magnesium::fsm

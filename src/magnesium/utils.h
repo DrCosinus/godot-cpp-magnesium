@@ -20,11 +20,6 @@ namespace magnesium
 		utils() = default;
 		~utils() override = default;
 
-		// static utils* create_singleton()
-		// {
-		// 	return memnew(utils);
-		// }
-
 		void print_type(const godot::Variant& p_variant) const;
 		godot::Variant try_call_method(const godot::Variant** args, GDExtensionInt arg_count, GDExtensionCallError& error);
 	};
@@ -40,7 +35,7 @@ namespace magnesium
 		}
 		const T& operator[](GDExtensionInt index) const
 		{
-			ERR_FAIL_COND(index >= size);
+			ERR_FAIL_COND_V(index >= size, T{});
 			return data[index];
 		}
 		GDExtensionInt length() const

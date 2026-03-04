@@ -28,5 +28,12 @@ namespace magnesium
 				instance() = nullptr;
 			}
 		}
+
+		static T* release_instance()
+		{
+			T* temp = instance();
+			instance() = nullptr;
+			return temp;
+		}
 	};
 } // namespace magnesium
