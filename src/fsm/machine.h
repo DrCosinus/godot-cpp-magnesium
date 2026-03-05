@@ -15,6 +15,10 @@ namespace magnesium::fsm
 
 	protected:
 		static void _bind_methods();
+		void enable_transtion(bool enable)
+		{
+			transition_enabled = enable;
+		}
 
 	public:
 		machine() = default;
@@ -35,17 +39,9 @@ namespace magnesium::fsm
 		{
 			context_state_map[p_context] = new_state;
 		}
-		// STATE_BASE_TYPE* Variant2State(const godot::Variant& state)
-		// {
-		// 	if (!state || state.get_type() != godot::Variant::OBJECT)
-		// 	{
-		// 		return nullptr;
-		// 	}
-		// 	godot::Object* state_obj{ state };
-		// 	return godot::Object::cast_to<STATE_BASE_TYPE>(state_obj);
-		// }
 
 	private:
 		StlMap<godot::Object*, STATE_BASE_TYPE*> context_state_map;
+		bool transition_enabled{ false };
 	};
 } //namespace magnesium::fsm

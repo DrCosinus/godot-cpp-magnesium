@@ -1,7 +1,7 @@
 #include "machine.h"
 #include "context.h"
-#include "state.h"
 #include "godot_cpp_ex.hpp"
+#include "state.h"
 
 // #include "godot_cpp/core/class_db.hpp"
 #include "godot_cpp/classes/engine.hpp"
@@ -32,10 +32,9 @@ namespace magnesium::fsm
 
 		ADD_SIGNAL(MethodInfo(
 				"changed",
-				PropertyInfo(Variant::OBJECT, "from", PROPERTY_HINT_RESOURCE_TYPE, "GDScript"),
-				PropertyInfo(Variant::OBJECT, "to", PROPERTY_HINT_RESOURCE_TYPE, "GDScript"),
+				PropertyInfo(Variant::OBJECT, "from", PROPERTY_HINT_RESOURCE_TYPE, "Script"),
+				PropertyInfo(Variant::OBJECT, "to", PROPERTY_HINT_RESOURCE_TYPE, "Script"),
 				PropertyInfo(Variant::OBJECT, "context")));
-		ClassDB::get_method(get_class_static(), "update");
 
 		//  ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "current_state", PROPERTY_HINT_TYPE_STRING, "state"), "", "get_current_state");
 	}
@@ -48,10 +47,19 @@ namespace magnesium::fsm
 
 	void machine::update(Object* p_context, float delta)
 	{
-		STATE_BASE_TYPE* const current_state = get_current_state(p_context);
-		if (current_state)
 		{
-			current_state->call("update", p_context, delta);
+			STATE_BASE_TYPE* const current_state = get_current_state(p_context);
+			if (current_state)
+			{
+				current_state->call("orchestrate", p_context);
+			}
+		}
+		{
+			STATE_BASE_TYPE* const current_state = get_current_state(p_context);
+			if (current_state)
+			{
+				current_state->call("update", p_context, delta);
+			}
 		}
 	}
 
