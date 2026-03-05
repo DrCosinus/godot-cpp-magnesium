@@ -15,9 +15,9 @@ namespace magnesium::fsm
 
 	protected:
 		static void _bind_methods();
-		void enable_transtion(bool enable)
+		void allow_transitions(bool enable)
 		{
-			transition_enabled = enable;
+			transitions_allowed = enable;
 		}
 
 	public:
@@ -27,13 +27,14 @@ namespace magnesium::fsm
 		void update(godot::Object* p_context, float delta);
 
 		void travel_to(godot::Object* p_context, STATE_BASE_TYPE* new_state);
+		godot::Variant call_on_state(const godot::Variant** args, GDExtensionInt arg_count, GDExtensionCallError& error);
 
 		STATE_BASE_TYPE* get_current_state(godot::Object* p_context) const
 		{
 			auto it = context_state_map.find(p_context);
 			return it != context_state_map.end() ? it->second : nullptr;
 		}
-		godot::StringName get_state_name(const STATE_BASE_TYPE* state) const;
+		godot::StringName get_state_name(STATE_BASE_TYPE* state) const;
 		godot::StringName get_current_state_name(godot::Object* p_context) const;
 		void set_current_state(godot::Object* p_context, STATE_BASE_TYPE* new_state)
 		{
@@ -42,6 +43,6 @@ namespace magnesium::fsm
 
 	private:
 		StlMap<godot::Object*, STATE_BASE_TYPE*> context_state_map;
-		bool transition_enabled{ false };
+		bool transitions_allowed{ false };
 	};
 } //namespace magnesium::fsm

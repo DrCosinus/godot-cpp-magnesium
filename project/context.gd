@@ -1,4 +1,4 @@
-class_name example_context
+class_name context
 
 var counter : int
 var time : float
