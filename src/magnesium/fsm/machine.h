@@ -4,7 +4,7 @@
 // #include "godot_cpp/classes/script.hpp"
 #include "godot_cpp/classes/wrapped.hpp"
 
-#include "magnesium/stl_map.hpp"
+#include "godot_extra/stl_map.hpp"
 
 namespace godot
 {

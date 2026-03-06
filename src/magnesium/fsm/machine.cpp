@@ -1,7 +1,7 @@
 #include "machine.h"
-#include "godot_cpp_ex.hpp"
-#include "magnesium/array_view.hpp"
 #include "state.h"
+
+#include "godot_extra/array_view.hpp"
 
 #include "godot_cpp/classes/script.hpp"
 #include "godot_cpp/core/class_db.hpp"
@@ -111,7 +111,7 @@ namespace magnesium::fsm
 		}
 		Object* context = static_cast<Object*>(*args[0]);
 		const StringName method_name = static_cast<StringName>(*args[1]);
-		array_view<const Variant*> arr{ args, arg_count };
+		godot_extra::array_view<const Variant*> arr{ args, arg_count };
 		arr.skip(2);
 
 		Script* const current_state = get_current_state(context);

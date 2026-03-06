@@ -3,7 +3,7 @@
 #include "godot_cpp/variant/array.hpp"
 #include <type_traits>
 
-namespace magnesium
+namespace godot_extra
 {
 	template <typename T>
 	struct array_view
@@ -47,4 +47,4 @@ namespace magnesium
 			return arr;
 		}
 	};
-}
+} //namespace godot_extra

@@ -4,7 +4,7 @@
 #include "godot_cpp/core/class_db.hpp"
 #include "godot_cpp/variant/variant.hpp"
 
-#include "array_view.hpp"
+#include "godot_extra/array_view.hpp"
 
 using namespace godot;
 
@@ -69,7 +69,7 @@ namespace magnesium
 		}
 		return obj ? obj->callv(method_name, arr) : Variant{};
 #else
-		array_view<const Variant*> arr{ args, arg_count };
+		godot_extra::array_view<const Variant*> arr{ args, arg_count };
 		arr.skip(2);
 		return obj ? obj->callv(method_name, arr.to_array()) : Variant{};
 #endif

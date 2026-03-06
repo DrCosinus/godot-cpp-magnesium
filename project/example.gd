@@ -3,17 +3,29 @@ extends Node2D
 var ctx:= context.new()
 var font := ThemeDB.fallback_font
 
+# 0 - Warmup enter
+# 1 - stated_changed
+# 2 - warmup first orchestration
+# 3 - warmup first update
+# 4 - warmup last orchestration
+# 5 - Warmup exit
+# 6 - enter idle
+# 7 - stated_changed
+
 func _ready() -> void:
 	MgFsmMachine.changed.connect(on_state_changed)
 	MgFsmMachine.travel_to(ctx, warmup)
 	MgFsmMachine.update(ctx, 1.2)
+	#await get_tree().create_timer(5.0).timeout
+	print("Done.")
 
 func _process(delta: float) -> void:
 	MgFsmMachine.update(ctx, delta)
 	queue_redraw()
 
-func on_state_changed(from: Object, to: Object, _p_context: Object):
-	print("changed signal from: %s to: %s" % [MgFsmMachine.get_state_name(from), MgFsmMachine.get_state_name(to)])
+func on_state_changed(_from: Script, _to: Script, obj: Object):
+	var c := obj as context
+	c.check_sequence_index([1, 7], "state changed signal")
 
 func _draw() -> void:
 	MgFsmMachine.call_on_state(ctx, &"draw", ctx, self, font)
@@ -21,15 +33,22 @@ func _draw() -> void:
 class warmup:
 	const state_name := &"WarmUp"
 	static func enter(c: context):
-		print("enter warmup")
+		c.check_sequence_index(0, "enter warmup")
 		c.time = 3.0
-		c.counter = 1
+		c.counter = 0
 	static func orchestrate(c: context):
+		if c.counter == 0:
+			c.check_sequence_index(2, "warmup first orchestration")
+			c.counter += 1
 		if c.time<=0:
+			c.check_sequence_index(4, "warmup last orchestration")
 			MgFsmMachine.travel_to(c, state_init)
 	static func update(c:context, dt):
+		if c.counter == 1:
+			c.check_sequence_index(3, "warmup first update")
+			c.counter += 1
 		c.time-=dt
-	static func exit(_c):
-		print("exit warmup")
+	static func exit(c: context):
+		c.check_sequence_index(5, "exit warmup")
 	static func draw(ctx: context, drawer: Node2D, font: Font) -> void:
 		drawer.draw_string(font, Vector2(4,20), "Countdown: %.0f" % ctx.time)

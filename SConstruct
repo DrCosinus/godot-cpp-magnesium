@@ -38,7 +38,7 @@ Run the following command to download godot-cpp:
 env = SConscript("godot-cpp/SConstruct", {"env": env, "customs": customs})
 
 env.Append(CPPPATH=["src/"])
-sources = Glob("src/*.cpp") + Glob("src/magnesium/**/*.cpp") + Glob("src/magnesium/*.cpp")
+sources = Glob("src/*.cpp") + Glob("src/magnesium/**/*.cpp") + Glob("src/magnesium/*.cpp") + Glob("src/godot_extra/*.cpp")
 # sources = [s for s in all_sources if "src/gen/" not in str(s)]
 # print("SOURCES:", sources)
 
