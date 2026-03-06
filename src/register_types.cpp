@@ -1,18 +1,11 @@
 #include "register_types.h"
 
 #include <gdextension_interface.h>
-#include <godot_cpp/classes/engine.hpp>
 #include <godot_cpp/core/class_db.hpp>
 #include <godot_cpp/core/defs.hpp>
 #include <godot_cpp/godot.hpp>
 
-// magnesium includes
-#include "example_class.h"
-#include "fsm/context.h"
-#include "fsm/machine.h"
-#include "fsm/state.h"
-#include "magnesium/instance_provider.hpp"
-#include "magnesium/utils.h"
+#include "magnesium/register_types.hpp"
 
 using namespace godot;
 
@@ -22,22 +15,8 @@ void initialize_gdextension_types(ModuleInitializationLevel p_level)
 	{
 		return;
 	}
-	GDREGISTER_CLASS(ExampleClass);
 
-	{
-		using namespace magnesium;
-		{
-			using namespace fsm;
-			GDREGISTER_CLASS(machine);
-			InstanceProvider<machine>::create_instance();
-			Engine::get_singleton()->register_singleton("MgFsmMachine", InstanceProvider<machine>::instance());
-		}
-		{
-			GDREGISTER_CLASS(utils);
-			InstanceProvider<utils>::create_instance();
-			Engine::get_singleton()->register_singleton("MgUtils", InstanceProvider<utils>::instance());
-		}
-	}
+	magnesium::register_types();
 }
 
 void uninitialize_gdextension_types(ModuleInitializationLevel p_level)
@@ -46,18 +25,7 @@ void uninitialize_gdextension_types(ModuleInitializationLevel p_level)
 	{
 		return;
 	}
-	{
-		using namespace magnesium;
-		{
-			Engine::get_singleton()->unregister_singleton("MgUtils");
-			InstanceProvider<utils>::release_instance();
-		}
-		{
-			using namespace fsm;
-			Engine::get_singleton()->unregister_singleton("MgFsmMachine");
-			InstanceProvider<machine>::release_instance();
-		}
-	}
+	magnesium::unregister_types();
 }
 
 extern "C"

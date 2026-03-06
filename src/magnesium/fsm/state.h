@@ -4,19 +4,10 @@
 #include "godot_cpp/classes/ref_counted.hpp"
 #include "godot_cpp/classes/wrapped.hpp"
 
-// #include "godot_cpp/core/binder_common.hpp"
 #include "godot_cpp/core/gdvirtual.gen.inc"
-
-// #include "context.h"
-// #include "machine.h"
-
-// using namespace godot;
 
 namespace magnesium::fsm
 {
-	// class context;
-	// class machine;
-
 	class state : public godot::RefCounted
 	{
 		GDCLASS(state, godot::RefCounted);
