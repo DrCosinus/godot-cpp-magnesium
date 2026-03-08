@@ -13,6 +13,7 @@ namespace magnesium
 	void utils::_bind_methods()
 	{
 		ClassDB::bind_method(D_METHOD("print_type", "variant"), &utils::print_type);
+		ClassDB::bind_method(D_METHOD("dump", "script"), &utils::dump);
 		{
 			MethodInfo mi;
 			mi.arguments.push_back(PropertyInfo(Variant::OBJECT, "p_object"));
@@ -73,5 +74,27 @@ namespace magnesium
 		arr.skip(2);
 		return obj ? obj->callv(method_name, arr.to_array()) : Variant{};
 #endif
+	}
+
+	void utils::dump(const Variant& script) const
+	{
+		if (script.get_type() != Variant::OBJECT)
+		{
+			print_line("Not an object");
+			return;
+		}
+		Object* obj = static_cast<Object*>(script);
+		auto property_list = obj->get_property_list();
+		for (int i = 0; i < property_list.size(); ++i)
+		{
+			auto& prop = static_cast<Dictionary>(property_list[i]);
+			auto name = static_cast<String>(prop["name"]);
+			auto type = prop["type"].stringify(); // static_cast<Variant::Type>(static_cast<int>(prop["type"]));
+			auto usage = prop["usage"].stringify();
+
+			auto value = obj->get(name);
+			print_line(vformat("Property %d: %s (%s, %s) = %s", i, name, type, usage, value));
+		}
+		// print_line(vformat("Script dump: %s", property_list));
 	}
 } //namespace magnesium

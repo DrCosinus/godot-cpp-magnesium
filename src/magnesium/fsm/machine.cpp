@@ -37,52 +37,47 @@ namespace magnesium::fsm
 
 	Script* machine::get_current_state(godot::Object* context) const
 	{
-		auto it = context_state_map.find(context);
+		auto it{ context_state_map.find(context) };
 		return it != context_state_map.end() ? it->second : nullptr;
 	}
 
 	void machine::travel_to(Object* context, Script* to_state)
 	{
-		Script* const from_state = get_current_state(context);
+		const auto from_state{ get_current_state(context) };
+		if (from_state == to_state)
+		{
+			return;
+		}
+		// Only allow transitions if there is no current state or if transitions
+		// are explicitly allowed (e.g. from within the orchestrate method of the current state)
 		if (from_state && !transitions_allowed)
 		{
 			ERR_PRINT("Transitions are not allowed at this time. Make sure to call travel_to from within the 'orchestrate' method of the current state or there is no current state.");
 			return;
 		}
-		if (from_state == to_state)
-		{
-			return;
-		}
 		if (from_state)
-		{
 			from_state->call("exit", context);
-		}
+
 		set_current_state(context, to_state);
+
 		if (to_state)
-		{
 			to_state->call("enter", context);
-		}
+
 		emit_signal("changed", from_state, to_state, context);
 	}
 
 	void machine::update(Object* context, float delta)
 	{
+		if (const auto current_state{ get_current_state(context) }; current_state)
 		{
-			Script* const current_state = get_current_state(context);
-			if (current_state)
-			{
-				allow_transitions(true);
-				current_state->call("orchestrate", context);
-				allow_transitions(false);
-			}
+			allow_transitions(true);
+			current_state->call("orchestrate", context);
+			allow_transitions(false);
 		}
 		// state may change during the orchestrate call, so we need to get the current state again before calling update on it
+		if (const auto current_state{ get_current_state(context) }; current_state)
 		{
-			Script* const current_state = get_current_state(context);
-			if (current_state)
-			{
-				current_state->call("update", context, delta);
-			}
+			current_state->call("update", context, delta);
 		}
 	}
 
@@ -109,20 +104,15 @@ namespace magnesium::fsm
 			error.expected = Variant::STRING_NAME;
 			return Variant{};
 		}
-		Object* context = static_cast<Object*>(*args[0]);
-		const StringName method_name = static_cast<StringName>(*args[1]);
+		const auto context{ static_cast<Object*>(*args[0]) };
+		const auto method_name{ static_cast<StringName>(*args[1]) };
 		godot_extra::array_view<const Variant*> arr{ args, arg_count };
 		arr.skip(2);
 
-		Script* const current_state = get_current_state(context);
-		if (current_state)
-		{
+		if (const auto current_state{ get_current_state(context) }; current_state)
 			return current_state->callv(method_name, arr.to_array());
-		}
 		else
-		{
 			return Variant{};
-		}
 	}
 
 	// the state name is determined by the "state_name" property of the state script if it exists,
@@ -134,12 +124,12 @@ namespace magnesium::fsm
 			return "None";
 		}
 
-		if (Variant var = state->get("state_name"); var.get_type() == Variant::STRING_NAME)
+		if (const auto var{ state->get("state_name") }; var.get_type() == Variant::STRING_NAME)
 		{
 			return var;
 		}
 
-		if (StringName global_name = state->get_global_name(); !global_name.is_empty())
+		if (const auto global_name{ state->get_global_name() }; !global_name.is_empty())
 		{
 			return global_name;
 		}
@@ -149,8 +139,7 @@ namespace magnesium::fsm
 
 	StringName machine::get_current_state_name(Object* context) const
 	{
-		Script* const current_state = get_current_state(context);
-		return get_state_name(current_state);
+		return get_state_name(get_current_state(context));
 	}
 
 } //namespace magnesium::fsm

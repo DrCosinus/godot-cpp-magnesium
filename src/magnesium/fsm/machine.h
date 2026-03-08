@@ -37,12 +37,12 @@ namespace magnesium::fsm
 		godot::Script* get_current_state(godot::Object* context) const;
 		godot::StringName get_state_name(godot::Script* state) const;
 		godot::StringName get_current_state_name(godot::Object* context) const;
+	private:
 		void set_current_state(godot::Object* context, godot::Script* new_state)
 		{
 			context_state_map[context] = new_state;
 		}
 
-	private:
 		StlMap<godot::Object*, godot::Script*> context_state_map;
 		bool transitions_allowed{ false };
 	};

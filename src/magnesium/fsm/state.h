@@ -11,8 +11,8 @@ namespace magnesium::fsm
 	class state : public godot::RefCounted
 	{
 		GDCLASS(state, godot::RefCounted);
-		static const auto METHOD_FLAG_VIRTUAL = godot::METHOD_FLAG_VIRTUAL;
-		static const auto METHOD_FLAG_VIRTUAL_REQUIRED = godot::METHOD_FLAG_VIRTUAL_REQUIRED;
+		static constexpr const auto METHOD_FLAG_VIRTUAL{ godot::METHOD_FLAG_VIRTUAL };
+		static constexpr const auto METHOD_FLAG_VIRTUAL_REQUIRED{ godot::METHOD_FLAG_VIRTUAL_REQUIRED };
 
 	protected:
 		static void _bind_methods();

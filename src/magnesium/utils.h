@@ -4,6 +4,7 @@
 #include "godot_cpp/classes/wrapped.hpp"
 #include "godot_cpp/variant/callable.hpp"
 #include "godot_cpp/variant/variant.hpp"
+#include "godot_cpp/classes/script.hpp"
 
 namespace magnesium
 {
@@ -20,5 +21,6 @@ namespace magnesium
 
 		void print_type(const godot::Variant& p_variant) const;
 		godot::Variant try_call_method(const godot::Variant** args, GDExtensionInt arg_count, GDExtensionCallError& error);
+		void dump(const godot::Variant& variant) const;
 	};
 } // namespace magnesium

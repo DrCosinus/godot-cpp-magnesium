@@ -7,9 +7,8 @@ namespace magnesium::fsm
 {
 	StringName state::get_class_name() const
 	{
-		Script* script = static_cast<Script*>(static_cast<Object*>(get_script()));
+		auto const script{ static_cast<Script*>(static_cast<Object*>(get_script())) };
 		return script ? script->get_global_name() : StringName{ get_class() };
-		// print_line(vformat("Class name: %s", obj->get_class()));
 	}
 
 	void state::_bind_methods()
