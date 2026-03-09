@@ -5,6 +5,7 @@
 #include "godot_cpp/variant/variant.hpp"
 
 #include "godot_extra/array_view.hpp"
+#include "godot_extra/property_info.hpp"
 
 using namespace godot;
 
@@ -72,24 +73,15 @@ namespace magnesium
 		const auto property_list{ obj->get_property_list() };
 		for (int i = 0; i < property_list.size(); ++i)
 		{
-			const auto& prop = static_cast<Dictionary>(property_list[i]);
-			auto name = static_cast<String>(prop["name"]);
-			auto type = prop["type"].stringify();
-			auto usage = prop["usage"].stringify();
+			const auto pi{ PropertyInfo::from_dict(property_list[i]) };
+
+			auto name = pi.name;
+			auto type = Variant::get_type_name(pi.type);
+			auto usage = godot_extra::property_info::get_usage_names(pi.usage);
 			auto value = obj->get(name);
 
 			print_line(vformat("Property %d: %s (%s, %s) = %s", i, name, type, usage, value));
-		}
-
-		const auto method_list{ obj->get_method_list() };
-		for (int i = 0; i < method_list.size(); ++i)
-		{
-			const auto& method = static_cast<Dictionary>(method_list[i]);
-			auto name = static_cast<String>(method["name"]);
-			auto args = method["args"];
-			auto return_type = method["return"].stringify();
-
-			print_line(vformat("Method %d: %s", i, name));
+			print_line(vformat("Dump of property %d: %s", i, static_cast<Dictionary>(pi)));
 		}
 	}
 } //namespace magnesium

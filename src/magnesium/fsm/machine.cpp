@@ -134,7 +134,11 @@ namespace magnesium::fsm
 			return global_name;
 		}
 
-		return String("State<%016X>") % (Array::make(reinterpret_cast<GDExtensionInt>(state)));
+		// for inner/sub classses, the global name is empty,
+		// if we have the parent class we could retrieve the name of the inner class from the parent
+		// class's constant map, but the parent class is unknown in this context, so we just return 
+		// the instance id of the script as a fallback to at least have a unique identifier for the state.
+		return String("{ State: %d }") % (Array::make(static_cast<GDExtensionInt>(state->get_instance_id())));
 	}
 
 	StringName machine::get_current_state_name(Object* context) const
