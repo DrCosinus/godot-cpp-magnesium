@@ -87,12 +87,12 @@ namespace magnesium
 		auto property_list = obj->get_property_list();
 		for (int i = 0; i < property_list.size(); ++i)
 		{
-			auto& prop = static_cast<Dictionary>(property_list[i]);
+			const auto& prop = static_cast<Dictionary>(property_list[i]);
 			auto name = static_cast<String>(prop["name"]);
 			auto type = prop["type"].stringify(); // static_cast<Variant::Type>(static_cast<int>(prop["type"]));
 			auto usage = prop["usage"].stringify();
-
 			auto value = obj->get(name);
+
 			print_line(vformat("Property %d: %s (%s, %s) = %s", i, name, type, usage, value));
 		}
 		// print_line(vformat("Script dump: %s", property_list));
