@@ -18,7 +18,7 @@ func _ready() -> void:
 	MgFsmMachine.update(ctx, 1.2)
 	#await get_tree().create_timer(5.0).timeout
 	print("Done.")
-	const plop = preload("res://example.gd")
+	#const plop = preload("res://example.gd")
 	MgUtils.dump(self)
 
 func _process(delta: float) -> void:
