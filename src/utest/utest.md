@@ -5,10 +5,10 @@ In sample1.gd
 class_name Sample1
 
 static func Factorial(n: int) -> int:
-    var result := 1
-    for i in range(2,n) + 1:
-        result *= i
-    return result
+	var result := 1
+	for i in range(2,n) + 1:
+		result *= i
+	return result
 ```
 
 In factorial_test.gd
@@ -16,18 +16,18 @@ In factorial_test.gd
 class_name FactorialTest extends UTest.Test
 
 static func Negative():
-    EXPECT_EQ(1, Sample1.Factorial(-5))
-    EXPECT_EQ(1, Sample1.Factorial(-1))
-    EXPECT_LT(0, Sample1.Factorial(-10))
+	EXPECT_EQ(1, Sample1.Factorial(-5))
+	EXPECT_EQ(1, Sample1.Factorial(-1))
+	EXPECT_LT(0, Sample1.Factorial(-10))
 
 static func Zero():
-    EXPECT_EQ(1, Sample1.Factorial(0))
+	EXPECT_EQ(1, Sample1.Factorial(0))
 
 static func Positive():
-    EXPECT_EQ(1, Sample1.Factorial(1));
-    EXPECT_EQ(2, Sample1.Factorial(2));
-    EXPECT_EQ(6, Sample1.Factorial(3));
-    EXPECT_EQ(40320, Sample1.Factorial(8));
+	EXPECT_EQ(1, Sample1.Factorial(1));
+	EXPECT_EQ(2, Sample1.Factorial(2));
+	EXPECT_EQ(6, Sample1.Factorial(3));
+	EXPECT_EQ(40320, Sample1.Factorial(8));
 ```
 
 ## Thinkings
