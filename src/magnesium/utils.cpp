@@ -7,7 +7,11 @@
 #include "godot_extra/array_view.hpp"
 #include "godot_extra/property_info.hpp"
 
+#include <algorithm>
+#include <vector>
+
 using namespace godot;
+using namespace godot_extra;
 
 namespace magnesium
 {
@@ -15,6 +19,7 @@ namespace magnesium
 	{
 		ClassDB::bind_method(D_METHOD("print_type", "variant"), &utils::print_type);
 		ClassDB::bind_method(D_METHOD("dump", "script"), &utils::dump);
+		ClassDB::bind_method(D_METHOD("get_own_methods", "object"), &utils::get_own_methods);
 		{
 			MethodInfo mi;
 			mi.arguments.push_back(PropertyInfo(Variant::OBJECT, "object"));
@@ -57,7 +62,7 @@ namespace magnesium
 		const auto method_name{ static_cast<StringName>(*args[1]) };
 
 		// Fortunately, Object::callv() is safe to call on an invalid method name, it will just return an empty Variant. So we don't need to check if the method exists before calling it.
-		godot_extra::array_view<const Variant*> arr{ args, arg_count };
+		array_view arr{ args, arg_count };
 		arr.skip(2);
 		return obj ? obj->callv(method_name, arr.to_array()) : Variant{};
 	}
@@ -83,5 +88,70 @@ namespace magnesium
 			print_line(vformat("Property %d: %s (%s, %s) = %s", i, name, type, usage, value));
 			print_line(vformat("Dump of property %d: %s", i, static_cast<Dictionary>(pi)));
 		}
+
+		const auto method_list{ obj->get_method_list() };
+		for (int i = 0; i < method_list.size(); ++i)
+		{
+			auto mi{ MethodInfo::from_dict(method_list[i]) };
+
+			auto name = mi.name;
+			auto return_type = Variant::get_type_name(mi.return_val.type);
+			std::function<String(const PropertyInfo&)> select = [](const PropertyInfo& pi) { return Variant::get_type_name(pi.type); };
+			auto argument_types = array_view{ array_view{ mi.arguments }.map(select) }.to_array();
+
+			print_line(vformat("Method %d: %s(%s) -> %s", i, name, String(", ").join(argument_types), return_type));
+			// print_line(vformat("Dump of method %d: %s", i, static_cast<Dictionary>(mi)));
+		}
+	}
+
+	// si c'est un script, son parent est son base script, sinon c'est la classe de l'objet
+	// si ça n'est pas un script, son parent est sa classe
+	TypedArray<StringName> utils::get_own_methods(Object* obj) const
+	{
+		std::vector<StringName> own_method_names;
+
+		if (Script* scr = Object::cast_to<Script>(obj); scr)
+		{
+			TypedArray<Dictionary> all_static_methods = scr->get_script_method_list();
+			auto all_static_methods_view = array_view{ all_static_methods };
+
+			TypedArray<Dictionary> parent_method_list;
+			if (const Ref<Script>& base_scr = scr->get_base_script(); base_scr.is_valid())
+				parent_method_list = ClassDB::class_get_method_list(base_scr->get_class_static());
+			if (!parent_method_list.is_empty())
+			{
+				// // first we build a list of the parent method names for easy lookup
+				// std::vector<StringName> parent_method_names;
+				// parent_method_names.reserve(parent_method_list.size());
+				// auto parent_methods_view = array_view{ parent_method_list };
+				// for (const auto& dict : parent_methods_view)
+				// {
+				// 	parent_method_names.push_back(dict["name"]);
+				// 	print_line(vformat("Parent method: %s", dict["name"]));
+				// }
+
+				// for (const auto& dict : all_static_methods_view)
+				// {
+				// 	auto method_name = dict["name"];
+				// 	if (std::find(parent_method_names.begin(), parent_method_names.end(), method_name) == parent_method_names.end())
+				// 		own_method_names.push_back(method_name);
+				// }
+			}
+			else
+			{
+				for (const auto& dict : all_static_methods_view)
+				{
+					auto method_name = dict["name"];
+					own_method_names.push_back(method_name);
+				}
+			}
+		}
+
+		TypedArray<StringName> own_method_names_array;
+		for (const auto& name : own_method_names)
+		{
+			own_method_names_array.push_back(name);
+		}
+		return own_method_names_array;
 	}
 } //namespace magnesium
