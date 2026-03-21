@@ -13,23 +13,20 @@ namespace godot_extra
 	template <typename T>
 	struct array_view
 	{
-		T* data;
-		GDExtensionInt size;
-
-		array_view(T* data, GDExtensionInt size) : data{ data }, size{ size }
+		array_view(const T* data, GDExtensionInt size) : data{ data }, size{ size }
 		{
 		}
-		array_view(std::vector<T>& vec) : array_view{ vec.data(), static_cast<GDExtensionInt>(vec.size()) }
+		array_view(std::vector<T> vec) : array_view{ vec.data(), static_cast<GDExtensionInt>(vec.size()) }
 		{
 		}
-		array_view(godot::TypedArray<T>& arr) : array_view{ static_cast<T*>(arr._native_ptr()), static_cast<GDExtensionInt>(arr.size()) }
+		array_view(godot::TypedArray<T>& arr) : array_view{ static_cast<const T*>(arr._native_ptr()), static_cast<GDExtensionInt>(arr.size()) }
 		{
 		}
-		T* begin() const
+		const T* begin() const
 		{
 			return data;
 		}
-		T* end() const
+		const T* end() const
 		{
 			return data + size;
 		}
@@ -74,6 +71,10 @@ namespace godot_extra
 			std::transform(begin(), end(), std::back_inserter(result), std::move(func));
 			return result;
 		}
+
+	private:
+		const T* data;
+		GDExtensionInt size;
 	};
 
 	// deduction guides
