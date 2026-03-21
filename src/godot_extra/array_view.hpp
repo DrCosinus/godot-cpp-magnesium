@@ -55,72 +55,149 @@ namespace godot_extra
 	// helper to map a function over an array_view and return a godot array
 	// (or any other container with reserve() or resize())
 	template <typename T>
-	struct array_traits;
+	struct array_proxy;
 	template <>
-	struct array_traits<godot::Array>
+	struct array_proxy<godot::Array>
 	{
 		using type = godot::Array;
 		using value_type = godot::Variant;
-		static void resize(godot::Array& arr, GDExtensionInt count)
+		static constexpr const bool value_is_pointer{ std::is_pointer_v<value_type> };
+		array_proxy(type& arr) : arr{ arr }
+		{
+		}
+		GDExtensionInt size() const
+		{
+			return arr.size();
+		}
+		void resize(GDExtensionInt count)
 		{
 			arr.resize(count);
 		}
-		static void set(godot::Array& arr, GDExtensionInt index, const godot::Variant& value)
+		void set(GDExtensionInt index, const godot::Variant& value)
 		{
 			arr[index] = value;
 		}
+		godot::Variant* native_ptr()
+		{
+			return reinterpret_cast<godot::Variant*>(arr._native_ptr());
+		}
+
+	private:
+		type& arr;
 	};
 	template <>
-	struct array_traits<godot::PackedStringArray>
+	struct array_proxy<godot::PackedStringArray>
 	{
 		using type = godot::PackedStringArray;
 		using value_type = godot::String;
-		static void resize(godot::PackedStringArray& arr, GDExtensionInt count)
+		static constexpr const bool value_is_pointer{ std::is_pointer_v<value_type> };
+		array_proxy(type& arr) : arr{ arr }
+		{
+		}
+		GDExtensionInt size() const
+		{
+			return arr.size();
+		}
+		void resize(GDExtensionInt count)
 		{
 			arr.resize(count);
 		}
-		static void set(godot::PackedStringArray& arr, GDExtensionInt index, const godot::String& value)
+		void set(GDExtensionInt index, const godot::String& value)
 		{
 			arr[index] = value;
 		}
+
+	private:
+		type& arr;
 	};
+
 	template <typename T>
-	struct array_traits<std::vector<T>>
+	struct array_proxy<std::vector<T>>
 	{
-		using type = array_view<T>;
+		using type = std::vector<T>;
 		using value_type = T;
-		static void resize(std::vector<T>& arr, GDExtensionInt count)
+		static constexpr const bool value_is_pointer{ std::is_pointer_v<value_type> };
+		array_proxy(type& arr) : arr{ arr }
+		{
+		}
+		GDExtensionInt size() const
+		{
+			return arr.size();
+		}
+		void resize(GDExtensionInt count)
 		{
 			arr.resize(count);
 		}
-		static void set(std::vector<T>& arr, GDExtensionInt index, const T& value)
+		void set(GDExtensionInt index, const T& value)
 		{
 			arr[index] = value;
 		}
+		T* native_ptr()
+		{
+			return arr.data();
+		}
+
+	private:
+		type& arr;
 	};
+
 	template <typename T>
-	struct array_traits<array_view<T>>
+	struct array_proxy<array_view<T>>
 	{
 		using type = array_view<T>;
 		using value_type = T;
+		static constexpr const bool value_is_pointer{ std::is_pointer_v<value_type> };
+		array_proxy(type view) : view{ view }
+		{
+		}
+		GDExtensionInt size() const
+		{
+			return view.size();
+		}
+		const T* native_ptr()
+		{
+			return view.begin();
+		}
+
+	private:
+		type& view;
 	};
 
 	template <typename OC = godot::Array, typename IC>
 	auto to_array(IC&& view)
 	{
 		OC arr;
-		array_traits<OC>::resize(arr, view.size());
+		array_proxy<OC> proxy{ arr };
+		proxy.resize(view.size());
 
 		GDExtensionInt i{ 0 };
 		for (auto item : view)
 		{
 			if constexpr (std::is_pointer_v<typename std::decay_t<IC>::value_type>) // if the input container holds pointers, dereference them before setting in the output container
-				array_traits<OC>::set(arr, i, *item);
+				proxy.set(i, *item);
 			else
-				array_traits<OC>::set(arr, i, item);
+				proxy.set(i, item);
 			++i;
 		}
 		return arr;
+		// using input_container_type = std::decay_t<IC>;
+		// array_proxy<input_container_type> in_proxy{ view };
+		// auto size{ in_proxy.size() };
+
+		// OC arr;
+		// array_proxy<OC> out_proxy{ arr };
+		// out_proxy.resize(size);
+
+		// const auto* in_ptr = in_proxy.native_ptr();
+		// auto* out_ptr = out_proxy.native_ptr();
+
+		// for (GDExtensionInt i{ 0 }; i < size; ++i, ++in_ptr, ++out_ptr)
+		// 	if constexpr (array_proxy<input_container_type>::value_is_pointer) // if the array holds pointers, dereference them before setting in the output container
+		// 		*out_ptr = **in_ptr;
+		// 	else
+		// 		*out_ptr = *in_ptr;
+
+		// return arr;
 	}
 
 	// helper to map a function over an array_view and return any container with reserve() or resize()
