@@ -96,8 +96,11 @@ namespace magnesium
 
 			auto name = mi.name;
 			auto return_type = Variant::get_type_name(mi.return_val.type);
-			std::function<String(const PropertyInfo&)> select = [](const PropertyInfo& pi) { return Variant::get_type_name(pi.type); };
-			auto argument_types = array_view{ array_view{ mi.arguments }.map(select) }.to_array();
+			
+			auto select = [](const PropertyInfo& pi) { return Variant::get_type_name(pi.type); };
+			auto args_view = array_view{ mi.arguments };
+			auto args_typenames = map_span(mi.arguments, select);
+			auto argument_types = array_view{ args_typenames }.to_array();
 
 			print_line(vformat("Method %d: %s(%s) -> %s", i, name, String(", ").join(argument_types), return_type));
 			// print_line(vformat("Dump of method %d: %s", i, static_cast<Dictionary>(mi)));

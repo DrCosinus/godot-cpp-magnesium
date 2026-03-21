@@ -13,3 +13,6 @@ static func Positive():
 	EXPECT_EQ(2, Sample1.Factorial(2));
 	EXPECT_EQ(6, Sample1.Factorial(3));
 	EXPECT_EQ(40320, Sample1.Factorial(8));
+
+static func NotATest(_i):
+	pass

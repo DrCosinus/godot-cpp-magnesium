@@ -21,7 +21,8 @@ func _ready() -> void:
 	print("Init Done.")
 	#MgTest.run_test(FactorialTest)
 	#MgTest.run_test(MgTest)
-	MgUtils.get_own_methods(FactorialTest)
+	print(MgUtils.get_own_methods(FactorialTest))
+	MgUtils.dump(FactorialTest)
 
 func _process(delta: float) -> void:
 	MgFsmMachine.update(ctx, delta)

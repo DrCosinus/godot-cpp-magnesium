@@ -1,14 +1,20 @@
 #!/usr/bin/env python
 import os
 import sys
+import datetime
+import atexit
 
 from methods import print_error
-
 
 libname = "Magnesium"
 projectdir = "project"
 
 localEnv = Environment(tools=["default"], PLATFORM="")
+
+def print_end_time():
+	print(f"Build finished at {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+
+atexit.register(print_end_time)
 
 # Build profiles can be used to decrease compile times.
 # You can either specify "disabled_classes", OR

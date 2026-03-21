@@ -11,9 +11,20 @@
 namespace godot_extra
 {
 	template <typename T>
+	struct to_array_helper
+	{
+		using type = godot::Array;
+	};
+	template <>
+	struct to_array_helper<godot::String>
+	{
+		using type = godot::PackedStringArray;
+	};
+	template <typename T>
 	struct array_view
 	{
-		array_view(const T* data, GDExtensionInt size) : data{ data }, size{ size }
+		using value_type = T;
+		array_view(const T* data, GDExtensionInt size) : data{ data }, len{ size }
 		{
 		}
 		array_view(std::vector<T> vec) : array_view{ vec.data(), static_cast<GDExtensionInt>(vec.size()) }
@@ -28,32 +39,33 @@ namespace godot_extra
 		}
 		const T* end() const
 		{
-			return data + size;
+			return data + len;
 		}
 		const T& operator[](GDExtensionInt index) const
 		{
-			ERR_FAIL_COND_V(index >= size, T{});
+			ERR_FAIL_COND_V(index >= len, T{});
 			return data[index];
 		}
-		GDExtensionInt length() const
+		std::size_t size() const
 		{
-			return size;
+			return static_cast<std::size_t>(len);
 		}
 		void skip(GDExtensionInt count)
 		{
-			ERR_FAIL_COND(count > size);
+			ERR_FAIL_COND(count > len);
 			data += count;
-			size -= count;
+			len -= count;
 		}
-		godot::Array to_array() const
+		using to_array_result_type = typename to_array_helper<T>::type;
+		to_array_result_type to_array() const
 		{
-			godot::Array arr;
-			arr.resize(size);
-			for (GDExtensionInt i = 0; i < size; ++i)
+			to_array_result_type arr;
+			arr.resize(len);
+			for (GDExtensionInt i = 0; i < len; ++i)
 			{
 				if constexpr (std::is_pointer_v<T>)
 				{
-					arr[i] = *data[i]; // Assuming T is a pointer type, we dereference it to get the actual value. If T is not a pointer type, this will need to be adjusted.
+					arr[i] = *data[i];
 				}
 				else
 				{
@@ -62,20 +74,43 @@ namespace godot_extra
 			}
 			return arr;
 		}
-		// map method to convert the array view to a vector of another type using a provided mapping function
-		template <typename U>
-		std::vector<U> map(std::function<U(const T&)> func) const
-		{
-			std::vector<U> result;
-			result.reserve(size);
-			std::transform(begin(), end(), std::back_inserter(result), std::move(func));
-			return result;
-		}
 
 	private:
 		const T* data;
-		GDExtensionInt size;
+		GDExtensionInt len;
 	};
+
+	template<typename C, typename = void>
+	struct reserve_helper
+	{
+		static void reserve(C&, size_t) {}
+	};
+	template<typename C>
+	struct reserve_helper<C, std::void_t<decltype(std::declval<C&>().reserve(std::declval<size_t>()))>>
+	{
+		static void reserve(C& c, size_t n) { c.reserve(n); }
+	};
+	template <typename R, typename... Ts>
+	using always_t = R;
+	template <typename C>
+	struct reserve_helper<C, always_t<int, decltype(std::declval<C&>().resize(std::declval<size_t>()))>>
+	{
+		static void resize(C& c, size_t n) { c.resize(n); }
+	};
+
+	// supports godot arrays, typed arrays, std::vector, array_views, and any other container with begin(), end(), and size()
+	// indeed, for now container must support back_inserter, and so push_back
+	template <template <typename...> typename OutputContainer = std::vector,typename C, typename F>
+	auto map_span(C&& view, F&& func)
+	{
+		using T = typename std::decay_t<C>::value_type;
+		using R = std::decay_t<std::invoke_result_t<F, const T&>>;
+		using Out = OutputContainer<R>;
+		Out result;
+		reserve_helper<Out>::reserve(result, view.size());
+		std::transform(view.begin(), view.end(), std::back_inserter(result), std::forward<F>(func));
+		return result;
+	}
 
 	// deduction guides
 	template <typename T>
@@ -86,5 +121,4 @@ namespace godot_extra
 
 	template <typename T>
 	array_view(const godot::TypedArray<T>& arr) -> array_view<T>;
-
 } //namespace godot_extra
