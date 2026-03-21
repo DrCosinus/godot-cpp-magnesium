@@ -11,16 +11,6 @@
 namespace godot_extra
 {
 	template <typename T>
-	struct to_array_helper
-	{
-		using type = godot::Array;
-	};
-	template <>
-	struct to_array_helper<godot::String>
-	{
-		using type = godot::PackedStringArray;
-	};
-	template <typename T>
 	struct array_view
 	{
 		using value_type = T;
@@ -56,51 +46,114 @@ namespace godot_extra
 			data += count;
 			len -= count;
 		}
-		using to_array_result_type = typename to_array_helper<T>::type;
-		to_array_result_type to_array() const
-		{
-			to_array_result_type arr;
-			arr.resize(len);
-			for (GDExtensionInt i = 0; i < len; ++i)
-			{
-				if constexpr (std::is_pointer_v<T>)
-				{
-					arr[i] = *data[i];
-				}
-				else
-				{
-					arr[i] = data[i];
-				}
-			}
-			return arr;
-		}
 
 	private:
 		const T* data;
 		GDExtensionInt len;
 	};
 
-	template<typename C, typename = void>
+	// helper to map a function over an array_view and return a godot array
+	// (or any other container with reserve() or resize())
+	template <typename T>
+	struct array_traits;
+	template <>
+	struct array_traits<godot::Array>
+	{
+		using type = godot::Array;
+		using value_type = godot::Variant;
+		static void resize(godot::Array& arr, GDExtensionInt count)
+		{
+			arr.resize(count);
+		}
+		static void set(godot::Array& arr, GDExtensionInt index, const godot::Variant& value)
+		{
+			arr[index] = value;
+		}
+	};
+	template <>
+	struct array_traits<godot::PackedStringArray>
+	{
+		using type = godot::PackedStringArray;
+		using value_type = godot::String;
+		static void resize(godot::PackedStringArray& arr, GDExtensionInt count)
+		{
+			arr.resize(count);
+		}
+		static void set(godot::PackedStringArray& arr, GDExtensionInt index, const godot::String& value)
+		{
+			arr[index] = value;
+		}
+	};
+	template <typename T>
+	struct array_traits<std::vector<T>>
+	{
+		using type = array_view<T>;
+		using value_type = T;
+		static void resize(std::vector<T>& arr, GDExtensionInt count)
+		{
+			arr.resize(count);
+		}
+		static void set(std::vector<T>& arr, GDExtensionInt index, const T& value)
+		{
+			arr[index] = value;
+		}
+	};
+	template <typename T>
+	struct array_traits<array_view<T>>
+	{
+		using type = array_view<T>;
+		using value_type = T;
+	};
+
+	template <typename OC = godot::Array, typename IC>
+	auto to_array(IC&& view)
+	{
+		OC arr;
+		array_traits<OC>::resize(arr, view.size());
+
+		GDExtensionInt i{ 0 };
+		for (auto item : view)
+		{
+			if constexpr (std::is_pointer_v<typename std::decay_t<IC>::value_type>) // if the input container holds pointers, dereference them before setting in the output container
+				array_traits<OC>::set(arr, i, *item);
+			else
+				array_traits<OC>::set(arr, i, item);
+			++i;
+		}
+		return arr;
+	}
+
+	// helper to map a function over an array_view and return any container with reserve() or resize()
+
+	template <typename C, typename = void>
 	struct reserve_helper
 	{
-		static void reserve(C&, size_t) {}
+		static void reserve(C&, size_t)
+		{
+		}
 	};
-	template<typename C>
+	template <typename C>
 	struct reserve_helper<C, std::void_t<decltype(std::declval<C&>().reserve(std::declval<size_t>()))>>
 	{
-		static void reserve(C& c, size_t n) { c.reserve(n); }
+		static void reserve(C& c, size_t n)
+		{
+			c.reserve(n);
+		}
 	};
 	template <typename R, typename... Ts>
 	using always_t = R;
 	template <typename C>
 	struct reserve_helper<C, always_t<int, decltype(std::declval<C&>().resize(std::declval<size_t>()))>>
 	{
-		static void resize(C& c, size_t n) { c.resize(n); }
+		static void resize(C& c, size_t n)
+		{
+			c.resize(n);
+		}
 	};
 
 	// supports godot arrays, typed arrays, std::vector, array_views, and any other container with begin(), end(), and size()
 	// indeed, for now container must support back_inserter, and so push_back
-	template <template <typename...> typename OutputContainer = std::vector,typename C, typename F>
+	template <template <typename...> typename OutputContainer = std::vector, typename C, typename F>
 	auto map_span(C&& view, F&& func)
 	{
 		using T = typename std::decay_t<C>::value_type;

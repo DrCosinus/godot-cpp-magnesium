@@ -8,6 +8,7 @@
 #include "godot_cpp/variant/string_name.hpp"
 
 using namespace godot;
+using namespace godot_extra;
 
 namespace magnesium::fsm
 {
@@ -106,11 +107,11 @@ namespace magnesium::fsm
 		}
 		const auto context{ static_cast<Object*>(*args[0]) };
 		const auto method_name{ static_cast<StringName>(*args[1]) };
-		godot_extra::array_view<const Variant*> arr{ args, arg_count };
+		array_view arr{ args, arg_count };
 		arr.skip(2);
 
 		if (const auto current_state{ get_current_state(context) }; current_state)
-			return current_state->callv(method_name, arr.to_array());
+			return current_state->callv(method_name, to_array(arr));
 		else
 			return Variant{};
 	}

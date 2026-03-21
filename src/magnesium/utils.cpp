@@ -64,7 +64,7 @@ namespace magnesium
 		// Fortunately, Object::callv() is safe to call on an invalid method name, it will just return an empty Variant. So we don't need to check if the method exists before calling it.
 		array_view arr{ args, arg_count };
 		arr.skip(2);
-		return obj ? obj->callv(method_name, arr.to_array()) : Variant{};
+		return obj ? obj->callv(method_name, to_array(arr)) : Variant{};
 	}
 
 	void utils::dump(const Variant& script) const
@@ -100,7 +100,7 @@ namespace magnesium
 			auto select = [](const PropertyInfo& pi) { return Variant::get_type_name(pi.type); };
 			auto args_view = array_view{ mi.arguments };
 			auto args_typenames = map_span(mi.arguments, select);
-			auto argument_types = array_view{ args_typenames }.to_array();
+			auto argument_types = to_array(args_typenames);
 
 			print_line(vformat("Method %d: %s(%s) -> %s", i, name, String(", ").join(argument_types), return_type));
 			// print_line(vformat("Dump of method %d: %s", i, static_cast<Dictionary>(mi)));
