@@ -22,7 +22,12 @@ func _ready() -> void:
 	#MgTest.run_test(FactorialTest)
 	#MgTest.run_test(MgTest)
 	print(MgUtils.get_own_methods(FactorialTest))
-	MgUtils.dump(FactorialTest)
+	#MgUtils.dump(FactorialTest)
+	MgUtils.print_type([12,true,5.6,78,"ios",42, -1])
+	MgUtils.print_type(PackedStringArray(["one", "two", "three"]))
+	var t3 : Array[int] = [507, -45, 8059]
+	MgUtils.print_type(t3)
+	
 
 func _process(delta: float) -> void:
 	MgFsmMachine.update(ctx, delta)

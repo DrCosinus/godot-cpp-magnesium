@@ -35,5 +35,7 @@ static func run_test(script: Script) -> void:
 		var name : StringName = method_infos[i]["name"]
 		if name in parent_method_names:
 			continue
+		var args : Array[Dictionary] = method_infos[i]["args"]
 		print("Test Found: %s" % [ name ])
+		print(args)
 		# method_infos[i]["flags"] is 33 (METHOD_FLAG_NORMAL + METHOD_FLAG_STATIC)

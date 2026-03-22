@@ -1,6 +1,7 @@
 #include "machine.h"
 #include "state.h"
 
+#include "godot_extra/array_ex.hpp"
 #include "godot_extra/array_view.hpp"
 
 #include "godot_cpp/classes/script.hpp"
@@ -111,7 +112,7 @@ namespace magnesium::fsm
 		arr.skip(2);
 
 		if (const auto current_state{ get_current_state(context) }; current_state)
-			return current_state->callv(method_name, to_array(arr));
+			return current_state->callv(method_name, array_transform(arr));
 		else
 			return Variant{};
 	}

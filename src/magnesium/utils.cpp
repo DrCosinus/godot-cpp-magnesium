@@ -4,6 +4,7 @@
 #include "godot_cpp/core/class_db.hpp"
 #include "godot_cpp/variant/variant.hpp"
 
+#include "godot_extra/array_ex.hpp"
 #include "godot_extra/array_view.hpp"
 #include "godot_extra/property_info.hpp"
 
@@ -32,7 +33,27 @@ namespace magnesium
 
 	void utils::print_type(const Variant& p_variant) const
 	{
-		print_line(vformat("Type: %d", p_variant.get_type()));
+		print_line(vformat("Type: %s", Variant::get_type_name(p_variant.get_type())));
+		switch (p_variant.get_type())
+		{
+			case Variant::ARRAY: {
+				Array arr = p_variant;
+				auto words = array_select<PackedStringArray>(arr, [](const Variant& v) {
+					return vformat("%s", v);
+				});
+				print_line(vformat("-> %s", String(", ").join(words)));
+				break;
+			}
+			case Variant::PACKED_STRING_ARRAY: {
+				PackedStringArray arr = p_variant;
+				array_view arr_view{ arr };
+				auto words = array_select<PackedStringArray>(arr_view, [](const String& v) {
+					return vformat("%s", v);
+				});
+				print_line(vformat("-> %s", String(", ").join(words)));
+				break;
+			}
+		}
 	}
 
 	Variant utils::try_call_method(const Variant** args, GDExtensionInt arg_count, GDExtensionCallError& error)
@@ -64,7 +85,7 @@ namespace magnesium
 		// Fortunately, Object::callv() is safe to call on an invalid method name, it will just return an empty Variant. So we don't need to check if the method exists before calling it.
 		array_view arr{ args, arg_count };
 		arr.skip(2);
-		return obj ? obj->callv(method_name, to_array(arr)) : Variant{};
+		return obj ? obj->callv(method_name, array_transform(arr)) : Variant{};
 	}
 
 	void utils::dump(const Variant& script) const
@@ -96,11 +117,10 @@ namespace magnesium
 
 			auto name = mi.name;
 			auto return_type = Variant::get_type_name(mi.return_val.type);
-			
+
 			auto select = [](const PropertyInfo& pi) { return Variant::get_type_name(pi.type); };
-			auto args_view = array_view{ mi.arguments };
-			auto args_typenames = map_span(mi.arguments, select);
-			auto argument_types = to_array(args_typenames);
+			auto args_typenames = array_select<PackedStringArray>(mi.arguments, select);
+			auto argument_types = array_transform(args_typenames);
 
 			print_line(vformat("Method %d: %s(%s) -> %s", i, name, String(", ").join(argument_types), return_type));
 			// print_line(vformat("Dump of method %d: %s", i, static_cast<Dictionary>(mi)));
