@@ -1,6 +1,14 @@
 [gd_scene format=3 uid="uid://dh0oj81pufivs"]
 
 [ext_resource type="Script" uid="uid://bkwk40ybs8kgm" path="res://example.gd" id="1_jdh55"]
+[ext_resource type="Texture2D" uid="uid://dbx66sovxd1" path="res://icon.svg" id="2_n51mc"]
+
+[sub_resource type="IndexedMaterial2D" id="IndexedMaterial2D_n51mc"]
 
 [node name="Node" type="Node2D" unique_id=1551391811]
 script = ExtResource("1_jdh55")
+
+[node name="Icon" type="Sprite2D" parent="." unique_id=950394577]
+material = SubResource("IndexedMaterial2D_n51mc")
+position = Vector2(87, 65)
+texture = ExtResource("2_n51mc")

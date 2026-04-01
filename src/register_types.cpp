@@ -6,6 +6,7 @@
 #include <godot_cpp/godot.hpp>
 
 #include "magnesium/register_types.hpp"
+#include "experimental/register_types.hpp"
 
 using namespace godot;
 
@@ -17,6 +18,7 @@ void initialize_gdextension_types(ModuleInitializationLevel p_level)
 	}
 
 	magnesium::register_types();
+	experimental::register_types();
 }
 
 void uninitialize_gdextension_types(ModuleInitializationLevel p_level)
@@ -25,6 +27,7 @@ void uninitialize_gdextension_types(ModuleInitializationLevel p_level)
 	{
 		return;
 	}
+	experimental::unregister_types();
 	magnesium::unregister_types();
 }
 
