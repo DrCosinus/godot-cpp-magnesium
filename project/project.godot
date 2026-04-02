@@ -19,6 +19,12 @@ run/main_scene="uid://dh0oj81pufivs"
 config/features=PackedStringArray("4.6", "Forward Plus")
 config/icon="res://icon.svg"
 
+[file_customization]
+
+folder_colors={
+"res://art/": "pink"
+}
+
 [network]
 
 limits/debugger/max_chars_per_second=1000000
