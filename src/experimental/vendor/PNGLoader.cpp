@@ -1,23 +1,53 @@
 #include "PNGLoader.hpp"
 
-#if 0
 #include <godot_cpp/classes/file_access.hpp>
 
-IndexedImageRawData PNGLoader::LoadRaw(const std::string& filename)
+// https://www.w3.org/TR/png-3/
+
+using namespace godot;
+
+namespace experimental
 {
-	// Logger.LogMessage($ "Loading PNG file \"{filename}\"...");
-
-	byte[] bytes = File.ReadAllBytes(filename);
-
-	if (bytes.Length <= PNGIdentifier.Length || !PNGIdentifier.SequenceEqual(bytes.Take(PNGIdentifier.Length)))
+	IndexedImageRawData PNGLoader::LoadRaw(const String& filename)
 	{
-		throw exceptionCreator($ "PNG identifier sequence not found in file \"{filename}\"!");
-	}
-	ReadOnlyMemory<byte> bytes_view = bytes;
+		print_line(vformat("Loading PNG file \"%s\"...", filename));
 
-	int width, height, bitDepth;
-	ColorType colorType;
-	byte compressionMethod, filterMethod, interlaceMethod;
+		PackedByteArray bytes = FileAccess::get_file_as_bytes(filename);
+		if (bytes.size() <= sizeof(PNGIdentifier) || memcmp(bytes.ptr(), PNGIdentifier, sizeof(PNGIdentifier)) != 0)
+		{
+			print_line_rich(vformat("[color=red]PNG identifier sequence not found in file \"%s\"![/color]", filename));
+			return {};
+		}
+		print_line_rich(vformat("[color=green]PNG identifier sequence found in file \"%s\"![/color]", filename));
+
+		readonly_bytes_stream stream{ bytes };
+
+		auto chunks = IndexChunks(stream);
+
+		int width, height, bitDepth;
+		ColorType colorType;
+		std::byte compressionMethod, filterMethod, interlaceMethod;
+
+		auto ihdrChunkIt = chunks.find("IHDR");
+		if (ihdrChunkIt == chunks.end())
+		{
+			print_line_rich(vformat("[color=red]Can not find the IHDR chunk in file \"%s\"![/color]", filename));
+			return {};
+		}
+		auto ihdrData = ihdrChunkIt->second;
+		{
+			width = ihdrData.ReadInt32();
+			height = ihdrData.ReadInt32();
+			bitDepth = ihdrData.ReadInt8();
+			// colorType = (ColorType)ihdrData.ReadInt8();
+			// compressionMethod = (std::byte)ihdrData.ReadInt8(); // for now always 0
+			// filterMethod = (std::byte)ihdrData.ReadInt8(); // for now always 0
+			// interlaceMethod = (std::byte)ihdrData.ReadInt8();
+			print_line(vformat("IHDR chunk: width=%d, height=%d, bitDepth=%d", width, height, bitDepth));
+		}
+
+		return {};
+#if 0
 
 	IndexChunks(bytes_view, out Dictionary<string, ReadOnlyMemory<byte>> chunks);
 
@@ -128,5 +158,35 @@ IndexedImageRawData PNGLoader::LoadRaw(const std::string& filename)
 		ImageData = imageData,
 		PaletteColors = palette
 	};
-}
 #endif
+	}
+
+	std::map<godot::String, readonly_bytes_stream> PNGLoader::IndexChunks(readonly_bytes_stream& stream /*data*/)
+	{
+		std::map<godot::String, readonly_bytes_stream> chunks;
+		// using ReadOnlyMemoryViewStream<byte> stream = new (data);
+
+		// skip the PNG identifier
+		stream.advance(sizeof(PNGIdentifier));
+
+		// Span<byte> buffer = stackalloc byte[4];
+
+		// chunk size + chunk header + chunk checksum = 12 bytes (minimum chunk size)
+		while (stream.Position() + 12 <= stream.size())
+		{
+			// read the chunk length
+			int chunkLength = stream.ReadInt32();
+
+			// read the chunk name
+			auto name = stream.ReadString(4);
+			print_line(vformat("Found chunk %s with length %d (%d bytes remaining in file)", name, chunkLength, stream.size() - stream.Position()));
+			// var chunkContent = data.Slice((int)stream.Position(), chunkLength);
+			// chunks.Add(name, chunkContent);
+			chunks[name] = stream.slice(chunkLength);
+
+			// // skip the chunk data and checksum
+			stream.advance(chunkLength + 4);
+		}
+		return chunks;
+	}
+} //namespace experimental

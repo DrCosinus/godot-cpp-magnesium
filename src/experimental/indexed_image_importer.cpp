@@ -1,74 +1,128 @@
-#include "indexed_image_import_plugin.hpp"
+#include "indexed_image_importer.hpp"
 
-#include "vendor/lodepng.h"
+// #include "vendor/lodepng.h"
 #include <godot_cpp/classes/image.hpp>
 #include <godot_cpp/classes/os.hpp>
 // #include <godot_cpp/core/ustring.hpp>
 // #include <godot_cpp/core/utility_functions.hpp>
+#include "vendor/PNGLoader.hpp"
+#include <godot_cpp/classes/project_settings.hpp>
 #include <godot_cpp/variant/packed_byte_array.hpp>
 #include <godot_cpp/variant/packed_string_array.hpp>
 
 using namespace godot;
 
-void IndexedImageImportPlugin::_bind_methods()
+IndexedImageImporter::IndexedImageImporter() = default;
+
+String IndexedImageImporter::_get_importer_name() const
 {
-	// no methods to bind for now
+	return String("indexed_image.importer");
 }
 
-IndexedImageImportPlugin::IndexedImageImportPlugin()
-{
-}
-
-String IndexedImageImportPlugin::_get_importer_name() const
-{
-	return String("indexed_image");
-}
-
-String IndexedImageImportPlugin::_get_visible_name() const
+String IndexedImageImporter::_get_visible_name() const
 {
 	return String("Indexed Image (palette + index)");
 }
 
-PackedStringArray IndexedImageImportPlugin::_get_recognized_extensions() const
+int32_t IndexedImageImporter::_get_preset_count() const
+{
+	return 1;
+}
+
+String IndexedImageImporter::_get_preset_name(int32_t index) const
+{
+	if (index == 0)
+		return "Default";
+	return "";
+}
+
+PackedStringArray IndexedImageImporter::_get_recognized_extensions() const
 {
 	PackedStringArray exts;
-	exts.push_back(String("png"));
-	// exts.push_back(String("gif"));
-	// exts.push_back(String("bmp"));
-	// exts.push_back(String("tga"));
-	// exts.push_back(String("jpg"));
+	exts.push_back("png"); // for now let's just support PNG, since it has good lossless compression and supports indexed colors. We can add more formats later if needed.
+	// exts.push_back("gif");
+	// exts.push_back("bmp");
+	// exts.push_back("tga");
+	// exts.push_back("jpg");
 	return exts;
 }
 
-String IndexedImageImportPlugin::_get_save_extension() const
+TypedArray<Dictionary> IndexedImageImporter::_get_import_options(const String& path, int32_t preset_index) const
+{
+	TypedArray<Dictionary> options;
+
+	Dictionary opt;
+	opt["name"] = "dummy_option";
+	opt["type"] = Variant::BOOL;
+	opt["default_value"] = false;
+	options.push_back(opt);
+
+	return options;
+}
+
+String IndexedImageImporter::_get_save_extension() const
 {
 	// We don't produce a single Godot resource; keep a neutral extension.
-	return String("indexed");
+	return "indexed";
 }
 
-String IndexedImageImportPlugin::_get_resource_type() const
+String IndexedImageImporter::_get_resource_type() const
 {
-	return String("Resource");
+	return "IndexedMaterial2D"; // not really sure...
 }
 
-Error IndexedImageImportPlugin::_import(const String& p_source_file, const String& p_save_path, const Dictionary& p_options, const TypedArray<String>& p_platform_variants, const TypedArray<String>& p_gen_files) const
+float IndexedImageImporter::_get_priority() const
+{
+	return 1.0; // higher means higher priority
+}
+
+int32_t IndexedImageImporter::_get_import_order() const
+{
+	return IMPORT_ORDER_DEFAULT;
+}
+
+int32_t IndexedImageImporter::_get_format_version() const
+{
+	return 1;
+}
+
+bool IndexedImageImporter::_get_option_visibility(const String& path, const StringName& option_name, const Dictionary& options) const
+{
+	return true; // show all options for now
+}
+
+bool IndexedImageImporter::_can_import_threaded() const
+{
+	return true; // this importer is pure C++ and doesn't use any Godot API, so it should be safe to run in a background thread.
+}
+
+Error IndexedImageImporter::_import(const String& source_file, const String& p_save_path, const Dictionary& p_options, const TypedArray<String>& p_platform_variants, const TypedArray<String>& p_gen_files) const
 {
 	// Pure C++ importer: load image via Godot Image, build a palette (up to 256 colors)
-	using namespace godot;
 
-	Ref<Image> src = Image::load_from_file(p_source_file);
-	if (src.is_null())
+	String src_path = source_file;
+	if (src_path.begins_with("res://"))
 	{
-		UtilityFunctions::printerr(String("IndexedImageImportPlugin: failed to load '") + p_source_file + String("'."));
-		return Error::FAILED;
+		src_path = ProjectSettings::get_singleton()->globalize_path(src_path);
 	}
+	print_line("Resolved indexed image path: " + src_path);
+	// Ref<Image> src = Image::load_from_file(src_path);
+	IndexedImageRawData raw = experimental::PNGLoader::LoadRaw(src_path);
+	// if (src.is_null())
+	// {
+	// 	UtilityFunctions::printerr(String("IndexedImageImportPlugin: failed to load '") + src_path + String("'."));
+	// 	return Error::FAILED;
+	// }
 
-	// Ensure RGBA8 for easier processing
-	if (src->get_format() != Image::FORMAT_RGBA8)
-	{
-		src->convert(Image::FORMAT_RGBA8);
-	}
+	// print_line(vformat("Loaded source image: %dx%d, format=%d", src->get_width(), src->get_height(), src->get_format()));
+	return Error::FAILED;
+	// // Ensure RGBA8 for easier processing
+	// if (src->get_format() != Image::FORMAT_RGBA8)
+	// {
+	// 	src->convert(Image::FORMAT_RGBA8);
+	// }
 
+	/*
 	int width = src->get_width();
 	int height = src->get_height();
 
@@ -179,6 +233,6 @@ Error IndexedImageImportPlugin::_import(const String& p_source_file, const Strin
 		return Error::FAILED;
 	}
 
-	UtilityFunctions::print(String("IndexedImageImportPlugin: wrote ") + idx_path + String(" and ") + pal_path);
+	UtilityFunctions::print(String("IndexedImageImportPlugin: wrote ") + idx_path + String(" and ") + pal_path);*/
 	return Error::OK;
 }

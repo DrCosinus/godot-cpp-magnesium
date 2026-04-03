@@ -5,30 +5,37 @@
 #include <godot_cpp/core/defs.hpp>
 #include <godot_cpp/godot.hpp>
 
-#include "magnesium/register_types.hpp"
 #include "experimental/register_types.hpp"
+#include "magnesium/register_types.hpp"
 
 using namespace godot;
 
 void initialize_gdextension_types(ModuleInitializationLevel p_level)
 {
-	if (p_level != MODULE_INITIALIZATION_LEVEL_SCENE)
+	if (p_level == MODULE_INITIALIZATION_LEVEL_SCENE)
 	{
-		return;
+		// Register types that will be used in runtime here.
+		magnesium::register_types();
+		experimental::register_types();
 	}
-
-	magnesium::register_types();
-	experimental::register_types();
+	else if (p_level == MODULE_INITIALIZATION_LEVEL_EDITOR)
+	{
+		// Register types that need to be available in the editor but not at runtime here.
+		experimental::register_editor_types();
+	}
 }
 
 void uninitialize_gdextension_types(ModuleInitializationLevel p_level)
 {
-	if (p_level != MODULE_INITIALIZATION_LEVEL_SCENE)
+	if (p_level == MODULE_INITIALIZATION_LEVEL_SCENE)
 	{
-		return;
+		experimental::unregister_types();
+		magnesium::unregister_types();
 	}
-	experimental::unregister_types();
-	magnesium::unregister_types();
+	else if (p_level == MODULE_INITIALIZATION_LEVEL_EDITOR)
+	{
+		experimental::unregister_editor_types();
+	}
 }
 
 extern "C"
@@ -39,7 +46,7 @@ extern "C"
 		GDExtensionBinding::InitObject init_obj(p_get_proc_address, p_library, r_initialization);
 		init_obj.register_initializer(initialize_gdextension_types);
 		init_obj.register_terminator(uninitialize_gdextension_types);
-		init_obj.set_minimum_library_initialization_level(MODULE_INITIALIZATION_LEVEL_SCENE);
+		init_obj.set_minimum_library_initialization_level(MODULE_INITIALIZATION_LEVEL_EDITOR);
 
 		return init_obj.init();
 	}
