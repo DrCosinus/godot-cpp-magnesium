@@ -1,14 +1,12 @@
 #include "indexed_image_importer.hpp"
 
-// #include "vendor/lodepng.h"
 #include <godot_cpp/classes/image.hpp>
 #include <godot_cpp/classes/os.hpp>
-// #include <godot_cpp/core/ustring.hpp>
-// #include <godot_cpp/core/utility_functions.hpp>
 #include "vendor/PNGLoader.hpp"
 #include <godot_cpp/classes/project_settings.hpp>
 #include <godot_cpp/variant/packed_byte_array.hpp>
 #include <godot_cpp/variant/packed_string_array.hpp>
+#include <godot_cpp/classes/resource_saver.hpp>
 
 using namespace godot;
 
@@ -62,13 +60,12 @@ TypedArray<Dictionary> IndexedImageImporter::_get_import_options(const String& p
 
 String IndexedImageImporter::_get_save_extension() const
 {
-	// We don't produce a single Godot resource; keep a neutral extension.
-	return "indexed";
+	return "res";
 }
 
 String IndexedImageImporter::_get_resource_type() const
 {
-	return "IndexedMaterial2D"; // not really sure...
+	return "Texture2D"; // not really sure...
 }
 
 float IndexedImageImporter::_get_priority() const
@@ -93,29 +90,58 @@ bool IndexedImageImporter::_get_option_visibility(const String& path, const Stri
 
 bool IndexedImageImporter::_can_import_threaded() const
 {
-	return true; // this importer is pure C++ and doesn't use any Godot API, so it should be safe to run in a background thread.
+	return false;
 }
 
 Error IndexedImageImporter::_import(const String& source_file, const String& p_save_path, const Dictionary& p_options, const TypedArray<String>& p_platform_variants, const TypedArray<String>& p_gen_files) const
 {
-	// Pure C++ importer: load image via Godot Image, build a palette (up to 256 colors)
-
-	String src_path = source_file;
-	if (src_path.begins_with("res://"))
-	{
-		src_path = ProjectSettings::get_singleton()->globalize_path(src_path);
-	}
-	print_line("Resolved indexed image path: " + src_path);
-	// Ref<Image> src = Image::load_from_file(src_path);
-	IndexedImageRawData raw = experimental::PNGLoader::LoadRaw(src_path);
-	// if (src.is_null())
+	// String src_path = source_file;
+	// if (src_path.begins_with("res://"))
 	// {
-	// 	UtilityFunctions::printerr(String("IndexedImageImportPlugin: failed to load '") + src_path + String("'."));
-	// 	return Error::FAILED;
+	// 	src_path = ProjectSettings::get_singleton()->globalize_path(src_path);
 	// }
 
+	IndexedImageRawData raw = experimental::PNGLoader::LoadRaw(source_file);
+
+	if (raw.index_texture.is_null() || raw.palette_texture.is_null())
+	{
+		UtilityFunctions::printerr(String("IndexedImageImportPlugin: failed to load '") + source_file + String("'."));
+		return Error::FAILED;
+	}
+
+	auto index_filename = vformat("%s.%s", p_save_path, _get_save_extension());
+	print_line(vformat("Saving index texture to '%s' %dx%d...", index_filename, raw.index_texture->get_width(), raw.index_texture->get_height()	));
+	raw.index_texture->set_path(index_filename);
+	auto* resource_saver = ResourceSaver::get_singleton();
+
+	if (auto error =resource_saver->save(raw.index_texture); error != Error::OK)
+	{
+		print_error(vformat("IndexedImageImportPlugin: failed to save '%s'. %d", index_filename, int(error)));
+		return error;
+	}
+
+	auto palette_filename = vformat("%s.palette", p_save_path);
+	// print_line(vformat("Saving palette texture to '%s'...", palette_filename));
+	if (auto error = resource_saver->save(raw.palette_texture, vformat("%s_palette.res", p_save_path)); error != Error::OK)
+	{
+		print_error(vformat("IndexedImageImportPlugin: failed to save '%s'. %d", palette_filename, int(error)));
+		return error;
+	}
+	auto& gen_files = reinterpret_cast<PackedStringArray&>(const_cast<TypedArray<String>&>(p_gen_files));
+	gen_files.clear();
+	// gen_files.append(index_filename);
+	gen_files.append(palette_filename);
+
+	// save the index_image tresource
+	// Ref<ResourceSaver> saver = ResourceSaver::get_singleton();
+	// String idx_res_path = p_save_path + "_index.tres";
+	// Error save_err = saver->save(idx_res_path, raw.index_image);
+	// if (save_err != Error::OK)
+	// {
+	// 	UtilityFunctions::printerr(String("IndexedImageImportPlugin: failed to save
+
 	// print_line(vformat("Loaded source image: %dx%d, format=%d", src->get_width(), src->get_height(), src->get_format()));
-	return Error::FAILED;
+	return Error::OK;
 	// // Ensure RGBA8 for easier processing
 	// if (src->get_format() != Image::FORMAT_RGBA8)
 	// {

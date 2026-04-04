@@ -76,6 +76,13 @@ namespace experimental
 			ERR_FAIL_COND_V(pos + length > len, {});
 			return { data + pos, length };
 		}
+		godot::PackedByteArray copy() const
+		{
+			godot::PackedByteArray arr;
+			arr.resize(len - pos);
+			memcpy(arr.ptrw(), data + pos, len - pos);
+			return arr;
+		}
 
 	private:
 		const uint8_t* const data;

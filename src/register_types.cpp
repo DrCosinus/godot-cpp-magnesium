@@ -12,14 +12,13 @@ using namespace godot;
 
 void initialize_gdextension_types(ModuleInitializationLevel p_level)
 {
-	if (p_level == MODULE_INITIALIZATION_LEVEL_SCENE)
+
+	// must wait until editor level to register editor-only types, and so LEVEL_SCENE ones should wait too, and also to ensure that
+	if (p_level == MODULE_INITIALIZATION_LEVEL_EDITOR)
 	{
 		// Register types that will be used in runtime here.
 		magnesium::register_types();
 		experimental::register_types();
-	}
-	else if (p_level == MODULE_INITIALIZATION_LEVEL_EDITOR)
-	{
 		// Register types that need to be available in the editor but not at runtime here.
 		experimental::register_editor_types();
 	}
@@ -27,14 +26,12 @@ void initialize_gdextension_types(ModuleInitializationLevel p_level)
 
 void uninitialize_gdextension_types(ModuleInitializationLevel p_level)
 {
-	if (p_level == MODULE_INITIALIZATION_LEVEL_SCENE)
-	{
-		experimental::unregister_types();
-		magnesium::unregister_types();
-	}
-	else if (p_level == MODULE_INITIALIZATION_LEVEL_EDITOR)
+	if (p_level == MODULE_INITIALIZATION_LEVEL_EDITOR)
 	{
 		experimental::unregister_editor_types();
+
+		experimental::unregister_types();
+		magnesium::unregister_types();
 	}
 }
 

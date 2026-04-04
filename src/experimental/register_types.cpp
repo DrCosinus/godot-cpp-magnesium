@@ -13,20 +13,18 @@ using namespace godot;
 
 namespace experimental
 {
-	// static IndexedImageEditorPlugin *editor_plugin{ nullptr };
-
 	void register_types()
 	{
+		print_line("--- IndexedMaterial2D registered (experimental) ---");
 		GDREGISTER_CLASS(IndexedMaterial2D);
-		print_line_rich("[color=grey]--- IndexedMaterial2D registered (experimental) --- [/color]");
 	}
 
 	void register_editor_types()
 	{
+		print_line("--- IndexedImage Importer initialized (experimental) ---");
 		GDREGISTER_CLASS(IndexedImageImporter);
 		GDREGISTER_CLASS(IndexedImageEditorPlugin);
 		EditorPlugins::add_by_type<IndexedImageEditorPlugin>();
-		print_line_rich("[color=grey]--- IndexedImage Importer initialized (experimental) --- [/color]");
 	}
 
 	void unregister_editor_types()
