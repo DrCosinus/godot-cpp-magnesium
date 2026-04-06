@@ -1,56 +1,108 @@
 #pragma once
 
 #include <godot_cpp/classes/canvas_item_material.hpp>
-#include <godot_cpp/classes/wrapped.hpp>
-#include <godot_cpp/classes/texture2d.hpp>
 #include <godot_cpp/classes/ref.hpp>
+// #include <godot_cpp/classes/texture2d.hpp>
+#include "resources/palettized_image.hpp"
+#include <godot_cpp/classes/wrapped.hpp>
 #include <godot_cpp/core/gdvirtual.gen.inc>
 
-class IndexedMaterial2D : public godot::CanvasItemMaterial
+namespace experimental
 {
-	GDCLASS(IndexedMaterial2D, godot::CanvasItemMaterial);
-
-	godot::Ref<godot::Texture2D> index_texture;
-	godot::Ref<godot::Texture2D> palette_texture;
-
-	// palette animation parameters (assuming palette is a horizontal strip of palette_size colors)
-	// palette_row is the current row of the palette (0-based)
-	// animation (to be replaced with multiple range supports in the future):
-	// - palette_offset is the horizontal offset in the palette (0 to palette_size-1)
-	// - palette_speed is the speed of the animation in palette entries per second
-	float palette_size{ 256.0f };
-	float palette_row{ 0.0f };
-	float palette_offset{ 0.0f };
-	float palette_speed{ 0.0f };
-
-	// godot::RID shader_rid;
-	// godot::RID material_rid;
-
-protected:
-	static void _bind_methods();
-
-public:
-	IndexedMaterial2D();
-	~IndexedMaterial2D() override = default;
-
-	// godot::RID _get_rid() const override
-	// {
-	// 	return material_rid;
-	// }
-
-	GDVIRTUAL0RC(godot::Shader::Mode, _get_shader_mode);
-	godot::Shader::Mode _get_shader_mode() const override
+	class IndexedMaterial2D : public godot::CanvasItemMaterial
 	{
-		return godot::Shader::MODE_CANVAS_ITEM;
-	}
+		GDCLASS(IndexedMaterial2D, godot::CanvasItemMaterial);
 
-	void set_index_texture(const godot::Ref<godot::Texture2D> &p_texture);
-	godot::Ref<godot::Texture2D> get_index_texture() const { return index_texture; }
-	void set_palette_texture(const godot::Ref<godot::Texture2D> &p_texture);
-	godot::Ref<godot::Texture2D> get_palette_texture() const { return palette_texture; }
-	// need setters for palette animation parameters as well, but not implemented yet
-};
+		union MaterialKey {
+			struct
+			{
+				uint32_t blend_mode : 4;
+				uint32_t light_mode : 4;
+				uint32_t particles_animation : 1;
+				uint32_t invalid_key : 1;
+			};
 
+			uint32_t key = 0;
+
+			static uint32_t hash(const MaterialKey& p_key)
+			{
+				return hash_murmur3_one_32(p_key.key);
+			}
+			bool operator==(const MaterialKey& p_key) const
+			{
+				return key == p_key.key;
+			}
+		};
+		MaterialKey current_key;
+		struct ShaderData
+		{
+			godot::RID shader;
+			int users = 0;
+		};
+		static godot::HashMap<MaterialKey, ShaderData, MaterialKey> shader_map;
+
+		MaterialKey _compute_key() const
+		{
+			MaterialKey key;
+			key.key = 0;
+			key.blend_mode = get_blend_mode();
+			key.light_mode = get_light_mode();
+			key.particles_animation = get_particles_animation();
+			return key;
+		}
+
+		void _mark_initialized(const godot::Callable &p_add_to_dirty_list, const godot::Callable &p_update_shader);
+
+		godot::Ref<PalettizedImage> palettized_image;
+
+		// palette animation parameters (assuming palette is a horizontal strip of palette_size colors)
+		// palette_row is the current row of the palette (0-based)
+		// animation (to be replaced with multiple range supports in the future):
+		// - palette_offset is the horizontal offset in the palette (0 to palette_size-1)
+		// - palette_speed is the speed of the animation in palette entries per second
+		float palette_size{ 256.0f };
+		float palette_row{ 0.0f };
+		float palette_offset{ 0.0f };
+		float palette_speed{ 0.0f };
+
+		godot::RID shader_rid;
+		godot::RID material_rid;
+
+		void update_shader();
+
+	protected:
+		static void _bind_methods();
+
+	public:
+		IndexedMaterial2D();
+		~IndexedMaterial2D() override = default;
+
+		static void init_shaders();
+		static void finish_shaders();
+
+		godot::RID _get_rid() const override
+		{
+			return material_rid;
+		}
+
+		godot::RID _get_shader_rid() const
+		{
+			return shader_rid;
+		}
+
+		GDVIRTUAL0RC(godot::Shader::Mode, _get_shader_mode);
+		godot::Shader::Mode _get_shader_mode() const override
+		{
+			return godot::Shader::MODE_CANVAS_ITEM;
+		}
+
+		void set_palettized_image(const godot::Ref<PalettizedImage>& p_image);
+		godot::Ref<PalettizedImage> get_palettized_image() const
+		{
+			return palettized_image;
+		}
+	};
+} //namespace experimental
 /*
 #include <godot_cpp/classes/image.hpp>
 #include <godot_cpp/classes/image_texture.hpp>

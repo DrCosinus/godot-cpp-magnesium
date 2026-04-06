@@ -19,7 +19,7 @@ AllowAllParametersOfDeclarationOnNextLine: false
 # AllowShortEnumsOnASingleLine: true
 # AllowShortBlocksOnASingleLine: Never
 # AllowShortCaseLabelsOnASingleLine: false
-# AllowShortFunctionsOnASingleLine: All
+AllowShortFunctionsOnASingleLine: All
 # AllowShortLambdasOnASingleLine: All
 # AllowShortIfStatementsOnASingleLine: Never
 # AllowShortLoopsOnASingleLine: false
@@ -31,6 +31,7 @@ AllowAllParametersOfDeclarationOnNextLine: false
 #   - __capability
 # BinPackArguments: true
 # BinPackParameters: true
+BinPackALongBracedList: true
 # BraceWrapping:
 #   AfterCaseLabel:  false
 #   AfterClass:      false

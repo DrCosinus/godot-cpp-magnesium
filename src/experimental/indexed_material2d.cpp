@@ -3,67 +3,133 @@
 #include <godot_cpp/classes/rendering_server.hpp>
 #include <godot_cpp/core/object.hpp>
 // #include <godot_cpp/classes/canvas_item.hpp>
+#include <godot_cpp/classes/resource_loader.hpp>
 
 using namespace godot;
 
-void IndexedMaterial2D::_bind_methods()
+namespace experimental
 {
-	GDVIRTUAL_BIND(_get_shader_mode);
+	void IndexedMaterial2D::init_shaders()
+	{
+		// create shader and material
+		print_line("IndexedMaterial2D::init_shaders: creating shader and material");
+	}
 
-	ClassDB::bind_method(D_METHOD("set_index_texture", "tex"), &IndexedMaterial2D::set_index_texture);
-	ClassDB::bind_method(D_METHOD("get_index_texture"), &IndexedMaterial2D::get_index_texture);
-	ClassDB::bind_method(D_METHOD("set_palette_texture", "tex"), &IndexedMaterial2D::set_palette_texture);
-	ClassDB::bind_method(D_METHOD("get_palette_texture"), &IndexedMaterial2D::get_palette_texture);
+	void IndexedMaterial2D::finish_shaders()
+	{
+		// free shader and material
+		print_line("IndexedMaterial2D::finish_shaders: freeing shader and material");
+	}
 
-	// add properties for index and palette textures
-	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "index_texture", PROPERTY_HINT_RESOURCE_TYPE, "Texture2D"), "set_index_texture", "get_index_texture");
-	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "palette_texture", PROPERTY_HINT_RESOURCE_TYPE, "Texture2D"), "set_palette_texture", "get_palette_texture");
-}
+	void IndexedMaterial2D::_bind_methods()
+	{
+		GDVIRTUAL_BIND(_get_shader_mode);
 
-IndexedMaterial2D::IndexedMaterial2D()
-{
-	constexpr const char* shader_source_string = R"(
+		ClassDB::bind_method(D_METHOD("set_palettized_image", "image"), &IndexedMaterial2D::set_palettized_image);
+		ClassDB::bind_method(D_METHOD("get_palettized_image"), &IndexedMaterial2D::get_palettized_image);
+		// ClassDB::bind_method(D_METHOD("set_palette_texture", "tex"), &IndexedMaterial2D::set_palette_texture);
+		// ClassDB::bind_method(D_METHOD("get_palette_texture"), &IndexedMaterial2D::get_palette_texture);
+
+		// add properties for index and palette textures
+		ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "palettized_image", PROPERTY_HINT_RESOURCE_TYPE, "PalettizedImage"), "set_palettized_image", "get_palettized_image");
+		// ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "palette_texture", PROPERTY_HINT_RESOURCE_TYPE, "Texture2D"), "set_palette_texture", "get_palette_texture");
+	}
+
+	IndexedMaterial2D::IndexedMaterial2D()
+	{
+		material_rid = RenderingServer::get_singleton()->material_create();
+
+		current_key.invalid_key = 1; // force shader update on first use
+
+		update_shader();
+	}
+
+	void IndexedMaterial2D::_mark_initialized(const Callable& p_add_to_dirty_list, const Callable& p_update_shader)
+	{
+		//if (ResourceLoader::is_within_load())
+		{
+			DEV_ASSERT(init_state != INIT_STATE_READY);
+		}
+	}
+
+	void IndexedMaterial2D::update_shader()
+	{
+		MaterialKey mk = _compute_key();
+		if (mk == current_key)
+			return;
+
+		if (shader_map.has(current_key))
+		{
+			shader_map[current_key].users--;
+			if (shader_map[current_key].users <= 0)
+			{
+				// free shader
+				RenderingServer::get_singleton()->free_rid(shader_map[current_key].shader);
+				shader_map.erase(current_key);
+			}
+		}
+
+		current_key = mk;
+
+		if (shader_map.has(mk))
+		{
+			RenderingServer::get_singleton()->material_set_shader(material_rid, shader_map[mk].shader);
+			shader_map[mk].users++;
+			return;
+		}
+		constexpr const char* shader_source_string = R"(
 shader_type canvas_item;
 
-uniform sampler2D index_tex : source_color;
-uniform sampler2D palette_tex : source_color;
+uniform sampler2D index_tex : source_color, filter_nearest;
+uniform sampler2D palette_tex : source_color, filter_nearest;
 
-uniform float palette_size = 256.0;
-uniform float palette_row = 0.0; // pour animations
-uniform float palette_offset = 0.0; // cycling
-uniform float palette_speed = 0.0; // cycling auto
+// palette could hold multiple palettes on different row
+uniform int palette_row = 0; // pour animations
+// for a single simple animation
+uniform int palette_offset = 0; // cycling manual
+uniform float palette_speed = 0; // cycling auto
 
 void fragment() {
-    float index = texture(index_tex, UV).r * palette_size;
+	int index = int(texture(index_tex, UV).r * 256.0);
 
-    index = mod(index + palette_offset + TIME * palette_speed, palette_size);
+	vec2 pal_size = vec2(textureSize(palette_tex, 0));
+	index = int(mod(float(index + palette_offset) + TIME * palette_speed, pal_size.x));
 
-    float u = (index + 0.5) / palette_size;
-    float v = (palette_row + 0.5) / float(textureSize(palette_tex, 0).y);
+	vec2 pal_uv = (vec2(float(index), float(palette_row)) + vec2(0.5)) / pal_size;
 
-    COLOR = texture(palette_tex, vec2(u, v));
+    COLOR = texture(palette_tex, pal_uv);
 }
 )";
 
-	// RID shader_rid = RenderingServer::get_singleton()->shader_create();
-	// RenderingServer::get_singleton()->shader_set_code(shader_rid, shader_source_string);
+		ShaderData sd;
+		sd.shader = RenderingServer::get_singleton()->shader_create();
+		sd.users = 1;
+		RenderingServer::get_singleton()->shader_set_code(sd.shader, shader_source_string);
+		shader_map[mk] = sd;
+		RenderingServer::get_singleton()->material_set_shader(material_rid, sd.shader);
+	}
 
-	// RID material_rid = RenderingServer::get_singleton()->material_create();
-	// RenderingServer::get_singleton()->material_set_shader(material_rid, shader_rid);
-}
+	void IndexedMaterial2D::set_palettized_image(const godot::Ref<PalettizedImage>& p_image)
+	{
+		palettized_image = p_image;
+		if (palettized_image.is_null())
+			return;
+		// set textures to shader parameters
+		print_line("IndexedMaterial2D::set_palettized_image: setting index and palette textures to material");
+		RenderingServer::get_singleton()->material_set_param(get_rid(), "index_tex", palettized_image->get_index_texture());
+		RenderingServer::get_singleton()->material_set_param(get_rid(), "palette_tex", palettized_image->get_palette_texture());
+	}
+	// {
+	// 	index_texture = p_texture;
+	// 	// RenderingServer::get_singleton()->material_set_param(get_rid(), "index_texture", index_texture);
+	// }
 
-void IndexedMaterial2D::set_index_texture(const godot::Ref<godot::Texture2D>& p_texture)
-{
-	index_texture = p_texture;
-	// RenderingServer::get_singleton()->material_set_param(get_rid(), "index_texture", index_texture);
-}
-
-void IndexedMaterial2D::set_palette_texture(const godot::Ref<godot::Texture2D>& p_texture)
-{
-	palette_texture = p_texture;
-	// RenderingServer::get_singleton()->material_set_param(get_rid(), "palette_texture", palette_texture);
-}
-
+	// void IndexedMaterial2D::set_palette_texture(const godot::Ref<godot::Texture2D>& p_texture)
+	// {
+	// 	palette_texture = p_texture;
+	// 	// RenderingServer::get_singleton()->material_set_param(get_rid(), "palette_texture", palette_texture);
+	// }
+} //namespace experimental
 /*
 // setter --> emit bake_requested (only if not yet dirty) --> bake_texture (deferred) --> on_baked --> emit_changed
 

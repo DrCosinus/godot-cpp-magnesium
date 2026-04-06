@@ -4,10 +4,15 @@
 #include <godot_cpp/classes/editor_plugin_registration.hpp>
 #include <godot_cpp/classes/resource_importer.hpp>
 #include <godot_cpp/core/class_db.hpp>
+#include <godot_cpp/classes/resource_loader.hpp>
+#include <godot_cpp/classes/resource_saver.hpp>
 
-#include "indexed_image_editor_plugin.hpp"
-#include "indexed_image_importer.hpp"
 #include "indexed_material2d.hpp"
+#include "plugins/palettized_image_editor_plugin.hpp"
+#include "importers/palettized_image_importer.hpp"
+#include "resources/palettized_image.hpp"
+#include "resources/palettized_image_loader.hpp"
+#include "resources/palettized_image_saver.hpp"
 
 using namespace godot;
 
@@ -21,10 +26,15 @@ namespace experimental
 
 	void register_editor_types()
 	{
-		print_line("--- IndexedImage Importer initialized (experimental) ---");
-		GDREGISTER_CLASS(IndexedImageImporter);
-		GDREGISTER_CLASS(IndexedImageEditorPlugin);
-		EditorPlugins::add_by_type<IndexedImageEditorPlugin>();
+		print_line("--- Palettized Image Importer initialized (experimental) ---");
+		GDREGISTER_CLASS(PalettizedImageImporter);
+		GDREGISTER_CLASS(PalettizedImageEditorPlugin);
+		GDREGISTER_CLASS(PalettizedImage);
+		GDREGISTER_CLASS(PalettizedImageLoader);
+		GDREGISTER_CLASS(PalettizedImageSaver);
+		EditorPlugins::add_by_type<PalettizedImageEditorPlugin>();
+		ResourceLoader::get_singleton()->add_resource_format_loader(memnew(PalettizedImageLoader));
+		ResourceSaver::get_singleton()->add_resource_format_saver(memnew(PalettizedImageSaver));
 	}
 
 	void unregister_editor_types()

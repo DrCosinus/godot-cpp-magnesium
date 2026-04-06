@@ -1,14 +1,15 @@
 [remap]
 
-importer="indexed_image.importer"
+importer="palettized_image.importer"
 importer_version=1
-type="IndexedMaterial2D"
+type="PalettizedImage"
 uid="uid://cus35pkc3nron"
-valid=false
+path="res://.godot/imported/barrel.png-a34e773631d5a40c80bc75aea2b48128.palimg"
 
 [deps]
 
 source_file="res://art/indexed/barrel.png"
+dest_files=["res://.godot/imported/barrel.png-a34e773631d5a40c80bc75aea2b48128.palimg"]
 
 [params]
 
