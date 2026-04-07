@@ -22,28 +22,25 @@ namespace experimental
 	static Ref<PalettizedImageSaver> palettized_image_saver;
 	static Ref<PalettizedImageImporter> palettized_image_importer;
 
-	void register_types()
+	void register_editor_types()
 	{
-		print_line("--- Experimental types registered ---");
-		GDREGISTER_CLASS(PalettizedMaterial);
-		GDREGISTER_CLASS(PalettizedImageImporter);
-		GDREGISTER_CLASS(PalettizedImage);
+		print_line("--- Experimental editor types registered ---");
 
+		GDREGISTER_CLASS(PalettizedImageImporter);
 		GDREGISTER_CLASS(PalettizedImageEditorPlugin);
+
 		EditorPlugins::add_by_type<PalettizedImageEditorPlugin>();
 
-		GDREGISTER_CLASS(PalettizedImageLoader);
 		palettized_image_loader = memnew(PalettizedImageLoader);
 		ResourceLoader::get_singleton()->add_resource_format_loader(palettized_image_loader);
 
-		GDREGISTER_CLASS(PalettizedImageSaver);
 		palettized_image_saver = memnew(PalettizedImageSaver);
 		ResourceSaver::get_singleton()->add_resource_format_saver(palettized_image_saver);
 	}
 
-	void unregister_types()
+	void unregister_editor_types()
 	{
-		print_line("--- Experimental types unregistered ---");
+		print_line("--- Experimental editor types unregistered ---");
 		auto& resource_saver = *ResourceSaver::get_singleton();
 		resource_saver.remove_resource_format_saver(palettized_image_saver);
 
@@ -51,5 +48,19 @@ namespace experimental
 		resource_loader.remove_resource_format_loader(palettized_image_loader);
 
 		EditorPlugins::remove_by_type<PalettizedImageEditorPlugin>();
+	}
+
+	void register_scene_types()
+	{
+		print_line("--- Experimental scenetypes registered ---");
+
+		GDREGISTER_CLASS(PalettizedMaterial);
+		GDREGISTER_CLASS(PalettizedImage);
+		GDREGISTER_CLASS(PalettizedImageLoader);
+		GDREGISTER_CLASS(PalettizedImageSaver);
+	}
+
+	void unregister_scene_types()
+	{
 	}
 } //namespace experimental

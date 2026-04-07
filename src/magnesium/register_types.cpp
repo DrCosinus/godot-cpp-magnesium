@@ -8,10 +8,13 @@
 
 #include "instance_provider.hpp"
 
+using namespace godot;
+
 namespace magnesium
 {
 	void register_types()
 	{
+		print_line("--- Magnesium types registered ---");
 		fsm::register_types();
 		{
 			GDREGISTER_CLASS(utils);
@@ -21,6 +24,7 @@ namespace magnesium
 	}
 	void unregister_types()
 	{
+		print_line("--- Magnesium types unregistered ---");
 		{
 			godot::Engine::get_singleton()->unregister_singleton("MgUtils");
 			InstanceProvider<utils>::release_instance();
