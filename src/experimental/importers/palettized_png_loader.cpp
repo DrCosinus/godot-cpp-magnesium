@@ -1,4 +1,6 @@
-#include "PNGLoader.hpp"
+#include "palettized_png_loader.hpp"
+
+#include "../helpers/read_bytes_stream.hpp"
 
 #include <godot_cpp/classes/file_access.hpp>
 #include <godot_cpp/classes/image.hpp>
@@ -6,8 +8,6 @@
 #include <godot_cpp/classes/texture2d.hpp>
 #include <godot_cpp/variant/packed_byte_array.hpp>
 #include <godot_cpp/variant/packed_color_array.hpp>
-// #include <godot_cpp/classes/image_texture.hpp>
-#include "../helpers/read_bytes_stream.hpp"
 #include <map>
 
 // https://www.w3.org/TR/png-3/
@@ -90,7 +90,7 @@ namespace experimental
 		return chunks;
 	}
 
-	namespace PNGLoader
+	namespace PalettizedPNGLoader
 	{
 		Ref<PalettizedImage> LoadPalettizedImage(const String& filename)
 		{
@@ -232,5 +232,5 @@ namespace experimental
 			auto palette_tex = ImageTexture::create_from_image(palette_img);
 			return { memnew(PalettizedImage(std::move(index_tex), std::move(palette_tex))) };
 		}
-	} //namespace PNGLoader
+	} //namespace PalettizedPNGLoader
 } //namespace experimental

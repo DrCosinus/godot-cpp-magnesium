@@ -12,7 +12,7 @@ namespace experimental
 		static void _bind_methods() {}
 
 	public:
-		PalettizedImageImporter();
+		PalettizedImageImporter() = default;
 		~PalettizedImageImporter() override = default;
 
 		godot::String _get_importer_name() const override;

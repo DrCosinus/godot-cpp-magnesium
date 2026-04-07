@@ -1,10 +1,10 @@
 #pragma once
 
 #include "../resources/palettized_image.hpp"
-#include <godot_cpp/variant/string.hpp>
 #include <godot_cpp/classes/ref.hpp>
+#include <godot_cpp/variant/string.hpp>
 
-namespace experimental::PNGLoader
+namespace experimental::PalettizedPNGLoader
 {
 	godot::Ref<PalettizedImage> LoadPalettizedImage(const godot::String& filename);
-} //namespace experimental::PNGLoader
+} //namespace experimental::PalettizedPNGLoader

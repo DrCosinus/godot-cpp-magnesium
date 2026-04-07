@@ -33,6 +33,20 @@ namespace experimental
 			new (this) WriteBytesStream(std::move(other));
 			return *this;
 		}
+		bool WriteInt64(int64_t value)
+		{
+			ERR_FAIL_COND_V(pos + 8 > len, false);
+			data[pos] = (value >> 56) & 0xFF;
+			data[pos + 1] = (value >> 48) & 0xFF;
+			data[pos + 2] = (value >> 40) & 0xFF;
+			data[pos + 3] = (value >> 32) & 0xFF;
+			data[pos + 4] = (value >> 24) & 0xFF;
+			data[pos + 5] = (value >> 16) & 0xFF;
+			data[pos + 6] = (value >> 8) & 0xFF;
+			data[pos + 7] = value & 0xFF;
+			pos += 8;
+			return true;
+		}
 		bool WriteInt32(int32_t value)
 		{
 			ERR_FAIL_COND_V(pos + 4 > len, false);
@@ -51,10 +65,10 @@ namespace experimental
 			pos += 2;
 			return true;
 		}
-		bool WriteInt8(uint8_t value)
+		bool WriteInt8(int8_t value)
 		{
 			ERR_FAIL_COND_V(pos + 1 > len, false);
-			data[pos] = value;
+			data[pos] = static_cast<uint8_t>(value);
 			pos += 1;
 			return true;
 		}

@@ -1,9 +1,8 @@
 #include "palettized_image_importer.hpp"
 
-#include "PNGLoader.hpp"
+#include "palettized_png_loader.hpp"
+
 #include <godot_cpp/classes/image.hpp>
-// #include <godot_cpp/classes/os.hpp>
-// #include <godot_cpp/classes/project_settings.hpp>
 #include <godot_cpp/classes/resource_saver.hpp>
 #include <godot_cpp/variant/packed_byte_array.hpp>
 #include <godot_cpp/variant/packed_string_array.hpp>
@@ -12,9 +11,6 @@ using namespace godot;
 
 namespace experimental
 {
-
-	PalettizedImageImporter::PalettizedImageImporter() = default;
-
 	String PalettizedImageImporter::_get_importer_name() const
 	{
 		return String("palettized_image.importer");
@@ -41,12 +37,10 @@ namespace experimental
 	{
 		// for now let's just support PNG, since it has good lossless compression
 		// and supports indexed colors. We can add more formats later if needed.
-		PackedStringArray exts;
-		exts.push_back("png");
-		// exts.push_back("gif");
-		// exts.push_back("bmp");
-		// exts.push_back("tga");
-		// exts.push_back("jpg");
+		static const PackedStringArray exts = {
+			"png", // "gif", "bmp", "tga", "jpg"
+		};
+
 		return exts;
 	}
 
@@ -101,7 +95,7 @@ namespace experimental
 
 	Error PalettizedImageImporter::_import(const String& source_file, const String& p_save_path, const Dictionary& p_options, const TypedArray<String>& p_platform_variants, const TypedArray<String>& p_gen_files) const
 	{
-		auto pal_img = experimental::PNGLoader::LoadPalettizedImage(source_file);
+		auto pal_img = experimental::PalettizedPNGLoader::LoadPalettizedImage(source_file);
 
 		if (pal_img.is_null())
 		{
