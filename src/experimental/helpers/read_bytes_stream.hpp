@@ -6,35 +6,35 @@
 
 namespace experimental
 {
-	struct readonly_bytes_stream
+	struct ReadBytesStream
 	{
 		using value_type = uint8_t;
 		using size_type = ::std::size_t;
 
-		readonly_bytes_stream(const uint8_t* data, size_type size) : data{ data }, len{ size }
+		ReadBytesStream(const uint8_t* data, size_type size) : data{ data }, len{ size }
 		{
 		}
-		readonly_bytes_stream(const godot::PackedByteArray& arr) : readonly_bytes_stream{ arr.ptr(), static_cast<size_type>(arr.size()) }
+		ReadBytesStream(const godot::PackedByteArray& arr) : ReadBytesStream{ arr.ptr(), static_cast<size_type>(arr.size()) }
 		{
 		}
-		readonly_bytes_stream() : data{ nullptr }, len{ 0 }
+		ReadBytesStream() : data{ nullptr }, len{ 0 }
 		{
 		}
-		readonly_bytes_stream(const readonly_bytes_stream& other) : data{ other.data }, pos{ other.pos }, len{ other.len }
+		ReadBytesStream(const ReadBytesStream& other) : data{ other.data }, pos{ other.pos }, len{ other.len }
 		{
 		}
-		readonly_bytes_stream(readonly_bytes_stream&& other) noexcept : data{ other.data }, pos{ other.pos }, len{ other.len }
+		ReadBytesStream(ReadBytesStream&& other) noexcept : data{ other.data }, pos{ other.pos }, len{ other.len }
 		{
-			new (&other) readonly_bytes_stream();
+			new (&other) ReadBytesStream();
 		}
-		readonly_bytes_stream& operator=(const readonly_bytes_stream& other)
+		ReadBytesStream& operator=(const ReadBytesStream& other)
 		{
-			new (this) readonly_bytes_stream(other);
+			new (this) ReadBytesStream(other);
 			return *this;
 		}
-		readonly_bytes_stream& operator=(readonly_bytes_stream&& other) noexcept
+		ReadBytesStream& operator=(ReadBytesStream&& other) noexcept
 		{
-			new (this) readonly_bytes_stream(std::move(other));
+			new (this) ReadBytesStream(std::move(other));
 			return *this;
 		}
 		size_type Position() const
@@ -113,7 +113,7 @@ namespace experimental
 			pos += length;
 			return arr;
 		}
-		readonly_bytes_stream slice(size_type length)
+		ReadBytesStream slice(size_type length)
 		{
 			ERR_FAIL_COND_V(pos + length > len, {});
 			return { data + pos, length };

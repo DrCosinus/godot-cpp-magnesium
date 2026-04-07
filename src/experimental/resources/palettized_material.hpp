@@ -1,17 +1,16 @@
 #pragma once
 
+#include "palettized_image.hpp"
 #include <godot_cpp/classes/canvas_item_material.hpp>
 #include <godot_cpp/classes/ref.hpp>
-// #include <godot_cpp/classes/texture2d.hpp>
-#include "resources/palettized_image.hpp"
 #include <godot_cpp/classes/wrapped.hpp>
 #include <godot_cpp/core/gdvirtual.gen.inc>
 
 namespace experimental
 {
-	class IndexedMaterial2D : public godot::CanvasItemMaterial
+	class PalettizedMaterial : public godot::CanvasItemMaterial
 	{
-		GDCLASS(IndexedMaterial2D, godot::CanvasItemMaterial);
+		GDCLASS(PalettizedMaterial, godot::CanvasItemMaterial);
 
 		union MaterialKey {
 			struct
@@ -26,7 +25,7 @@ namespace experimental
 
 			static uint32_t hash(const MaterialKey& p_key)
 			{
-				return hash_murmur3_one_32(p_key.key);
+				return godot::hash_murmur3_one_32(p_key.key);
 			}
 			bool operator==(const MaterialKey& p_key) const
 			{
@@ -39,7 +38,7 @@ namespace experimental
 			godot::RID shader;
 			int users = 0;
 		};
-		static godot::HashMap<MaterialKey, ShaderData, MaterialKey> shader_map;
+		inline static godot::HashMap<MaterialKey, ShaderData, MaterialKey> shader_map;
 
 		MaterialKey _compute_key() const
 		{
@@ -51,7 +50,7 @@ namespace experimental
 			return key;
 		}
 
-		void _mark_initialized(const godot::Callable &p_add_to_dirty_list, const godot::Callable &p_update_shader);
+		void _mark_initialized(const godot::Callable& p_add_to_dirty_list, const godot::Callable& p_update_shader);
 
 		godot::Ref<PalettizedImage> palettized_image;
 
@@ -74,8 +73,8 @@ namespace experimental
 		static void _bind_methods();
 
 	public:
-		IndexedMaterial2D();
-		~IndexedMaterial2D() override = default;
+		PalettizedMaterial();
+		~PalettizedMaterial() override = default;
 
 		static void init_shaders();
 		static void finish_shaders();

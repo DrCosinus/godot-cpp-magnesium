@@ -1,4 +1,4 @@
-#include "indexed_material2d.hpp"
+#include "palettized_material.hpp"
 
 #include <godot_cpp/classes/rendering_server.hpp>
 #include <godot_cpp/core/object.hpp>
@@ -9,33 +9,33 @@ using namespace godot;
 
 namespace experimental
 {
-	void IndexedMaterial2D::init_shaders()
+	void PalettizedMaterial::init_shaders()
 	{
 		// create shader and material
-		print_line("IndexedMaterial2D::init_shaders: creating shader and material");
+		print_line("PalettizedMaterial::init_shaders: creating shader and material");
 	}
 
-	void IndexedMaterial2D::finish_shaders()
+	void PalettizedMaterial::finish_shaders()
 	{
 		// free shader and material
-		print_line("IndexedMaterial2D::finish_shaders: freeing shader and material");
+		print_line("PalettizedMaterial::finish_shaders: freeing shader and material");
 	}
 
-	void IndexedMaterial2D::_bind_methods()
+	void PalettizedMaterial::_bind_methods()
 	{
 		GDVIRTUAL_BIND(_get_shader_mode);
 
-		ClassDB::bind_method(D_METHOD("set_palettized_image", "image"), &IndexedMaterial2D::set_palettized_image);
-		ClassDB::bind_method(D_METHOD("get_palettized_image"), &IndexedMaterial2D::get_palettized_image);
-		// ClassDB::bind_method(D_METHOD("set_palette_texture", "tex"), &IndexedMaterial2D::set_palette_texture);
-		// ClassDB::bind_method(D_METHOD("get_palette_texture"), &IndexedMaterial2D::get_palette_texture);
+		ClassDB::bind_method(D_METHOD("set_palettized_image", "image"), &PalettizedMaterial::set_palettized_image);
+		ClassDB::bind_method(D_METHOD("get_palettized_image"), &PalettizedMaterial::get_palettized_image);
+		// ClassDB::bind_method(D_METHOD("set_palette_texture", "tex"), &PalettizedMaterial::set_palette_texture);
+		// ClassDB::bind_method(D_METHOD("get_palette_texture"), &PalettizedMaterial::get_palette_texture);
 
 		// add properties for index and palette textures
 		ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "palettized_image", PROPERTY_HINT_RESOURCE_TYPE, "PalettizedImage"), "set_palettized_image", "get_palettized_image");
 		// ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "palette_texture", PROPERTY_HINT_RESOURCE_TYPE, "Texture2D"), "set_palette_texture", "get_palette_texture");
 	}
 
-	IndexedMaterial2D::IndexedMaterial2D()
+	PalettizedMaterial::PalettizedMaterial()
 	{
 		material_rid = RenderingServer::get_singleton()->material_create();
 
@@ -44,15 +44,15 @@ namespace experimental
 		update_shader();
 	}
 
-	void IndexedMaterial2D::_mark_initialized(const Callable& p_add_to_dirty_list, const Callable& p_update_shader)
+	void PalettizedMaterial::_mark_initialized(const Callable& p_add_to_dirty_list, const Callable& p_update_shader)
 	{
 		//if (ResourceLoader::is_within_load())
-		{
-			DEV_ASSERT(init_state != INIT_STATE_READY);
-		}
+		// {
+		// 	DEV_ASSERT(init_state != INIT_STATE_READY);
+		// }
 	}
 
-	void IndexedMaterial2D::update_shader()
+	void PalettizedMaterial::update_shader()
 	{
 		MaterialKey mk = _compute_key();
 		if (mk == current_key)
@@ -109,13 +109,13 @@ void fragment() {
 		RenderingServer::get_singleton()->material_set_shader(material_rid, sd.shader);
 	}
 
-	void IndexedMaterial2D::set_palettized_image(const godot::Ref<PalettizedImage>& p_image)
+	void PalettizedMaterial::set_palettized_image(const godot::Ref<PalettizedImage>& p_image)
 	{
 		palettized_image = p_image;
 		if (palettized_image.is_null())
 			return;
 		// set textures to shader parameters
-		print_line("IndexedMaterial2D::set_palettized_image: setting index and palette textures to material");
+		print_line("PalettizedMaterial::set_palettized_image: setting index and palette textures to material");
 		RenderingServer::get_singleton()->material_set_param(get_rid(), "index_tex", palettized_image->get_index_texture());
 		RenderingServer::get_singleton()->material_set_param(get_rid(), "palette_tex", palettized_image->get_palette_texture());
 	}
@@ -124,7 +124,7 @@ void fragment() {
 	// 	// RenderingServer::get_singleton()->material_set_param(get_rid(), "index_texture", index_texture);
 	// }
 
-	// void IndexedMaterial2D::set_palette_texture(const godot::Ref<godot::Texture2D>& p_texture)
+	// void PalettizedMaterial::set_palette_texture(const godot::Ref<godot::Texture2D>& p_texture)
 	// {
 	// 	palette_texture = p_texture;
 	// 	// RenderingServer::get_singleton()->material_set_param(get_rid(), "palette_texture", palette_texture);

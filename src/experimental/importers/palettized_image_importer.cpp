@@ -1,6 +1,6 @@
 #include "palettized_image_importer.hpp"
 
-#include "../readers/PNGLoader.hpp"
+#include "PNGLoader.hpp"
 #include <godot_cpp/classes/image.hpp>
 // #include <godot_cpp/classes/os.hpp>
 // #include <godot_cpp/classes/project_settings.hpp>

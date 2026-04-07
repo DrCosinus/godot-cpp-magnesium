@@ -7,7 +7,7 @@
 #include <godot_cpp/variant/packed_byte_array.hpp>
 #include <godot_cpp/variant/packed_color_array.hpp>
 // #include <godot_cpp/classes/image_texture.hpp>
-#include "../readonly_bytes_stream.hpp"
+#include "../helpers/read_bytes_stream.hpp"
 #include <map>
 
 // https://www.w3.org/TR/png-3/
@@ -17,7 +17,7 @@ using namespace godot;
 namespace experimental
 {
 	static constexpr unsigned char PNGIdentifier[8] = { 137, 80, 78, 71, 13, 10, 26, 10 };
-	using ChunkStreamMap = std::map<godot::String, readonly_bytes_stream>;
+	using ChunkStreamMap = std::map<godot::String, ReadBytesStream>;
 
 	// bit 0: 0 - no palette, 1 - palette
 	// bit 1: 0 - grayscale, 1 - color
@@ -67,7 +67,7 @@ namespace experimental
 	// 	Paeth = 4
 	// };
 
-	static ChunkStreamMap ExtractChunkStreamMap(readonly_bytes_stream& stream)
+	static ChunkStreamMap ExtractChunkStreamMap(ReadBytesStream& stream)
 	{
 		ChunkStreamMap chunks;
 
@@ -101,7 +101,7 @@ namespace experimental
 				return {};
 			}
 
-			readonly_bytes_stream stream{ bytes };
+			ReadBytesStream stream{ bytes };
 
 			auto chunks = ExtractChunkStreamMap(stream);
 
@@ -205,7 +205,7 @@ namespace experimental
 
 			PackedByteArray imageData;
 			imageData.resize(width * height); // indexed color, so 1 byte per pixel
-			auto filteredImageDataStream = readonly_bytes_stream{ filteredImageData };
+			auto filteredImageDataStream = ReadBytesStream{ filteredImageData };
 
 			for (int lineIndex = 0; lineIndex < height; ++lineIndex)
 			{

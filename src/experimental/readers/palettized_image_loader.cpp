@@ -1,7 +1,7 @@
 #include "palettized_image_loader.hpp"
 
-#include "../readonly_bytes_stream.hpp"
-#include "palettized_image.hpp"
+#include "../helpers/read_bytes_stream.hpp"
+#include "../resources/palettized_image.hpp"
 #include <godot_cpp/classes/file_access.hpp>
 #include <godot_cpp/variant/packed_byte_array.hpp>
 
@@ -14,13 +14,12 @@ namespace experimental
 		static PackedStringArray exts = {
 			"palimg",
 		};
-		// exts.push_back("palimg");
 		return exts;
 	}
 
 	bool PalettizedImageLoader::_handles_type(const StringName& p_type) const
 	{
-		print_line(vformat("PalettizedImageLoader::_handles_type: checking if '%s' is a type we handle", p_type));
+		// print_line(vformat("PalettizedImageLoader::_handles_type: checking if '%s' is a type we handle", p_type));
 		static StringName expected_type{ "PalettizedImage" };
 		return p_type == expected_type;
 	}
@@ -32,7 +31,7 @@ namespace experimental
 		(void)p_original_path;
 
 		PackedByteArray bytes = FileAccess::get_file_as_bytes(p_path);
-		readonly_bytes_stream stream{ bytes };
+		ReadBytesStream stream{ bytes };
 
 		const auto width{ stream.ReadInt16() };
 		const auto height{ stream.ReadInt16() };

@@ -1,7 +1,7 @@
 #include "palettized_image_saver.hpp"
 
+#include "../helpers/write_bytes_stream.hpp"
 #include "../resources/palettized_image.hpp"
-#include "../write_bytes_stream.hpp"
 #include <godot_cpp/classes/file_access.hpp>
 #include <godot_cpp/classes/image.hpp>
 #include <godot_cpp/classes/image_texture.hpp>
