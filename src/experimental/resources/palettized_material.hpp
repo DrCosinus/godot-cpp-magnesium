@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../helpers/logger.hpp"
 #include "palettized_image.hpp"
 #include <godot_cpp/classes/canvas_item_material.hpp>
 #include <godot_cpp/classes/ref.hpp>
@@ -11,6 +12,8 @@ namespace experimental
 	class PalettizedMaterial : public godot::CanvasItemMaterial
 	{
 		GDCLASS(PalettizedMaterial, godot::CanvasItemMaterial);
+
+		inline static Logger<true> Log{ "PalMat" };
 
 		union MaterialKey {
 			struct

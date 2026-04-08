@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../helpers/logger.hpp"
 #include <godot_cpp/classes/editor_import_plugin.hpp>
 
 namespace experimental
@@ -7,6 +8,8 @@ namespace experimental
 	class PalettizedImageImporter : public godot::EditorImportPlugin
 	{
 		GDCLASS(PalettizedImageImporter, EditorImportPlugin);
+
+		inline static Logger<true> Log{ "PalImgImporter" };
 
 	protected:
 		static void _bind_methods() {}

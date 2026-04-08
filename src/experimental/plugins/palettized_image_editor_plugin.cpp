@@ -8,12 +8,12 @@ namespace experimental
 {
 	void PalettizedImageEditorPlugin::_enter_tree()
 	{
-		print_line("PalettizedImageEditorPlugin entered tree");
+		Log.print("PalettizedImageEditorPlugin entered tree");
 		add_import_plugin(memnew(PalettizedImageImporter));
 	}
 
 	void PalettizedImageEditorPlugin::_exit_tree()
 	{
-		print_line("PalettizedImageEditorPlugin exited tree");
+		Log.print("PalettizedImageEditorPlugin exited tree");
 	}
 } //namespace experimental

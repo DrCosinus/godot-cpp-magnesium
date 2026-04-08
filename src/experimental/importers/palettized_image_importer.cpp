@@ -99,21 +99,21 @@ namespace experimental
 
 		if (pal_img.is_null())
 		{
-			UtilityFunctions::printerr(String("PalettizedImageImportPlugin: failed to load '") + source_file + String("'."));
+			Log.print_error("PalettizedImageImportPlugin: failed to load '%s'.", source_file);
 			return Error::FAILED;
 		}
 
 		auto index_filename = vformat("%s.%s", p_save_path, _get_save_extension());
-		print_line(vformat("Saving palettized texture to '%s' %dx%d (%d colors x %d rows)...",
-						   index_filename,
-						   pal_img->get_index_texture()->get_width(),
-						   pal_img->get_index_texture()->get_height(),
-						   pal_img->get_palette_texture()->get_width(),
-						   pal_img->get_palette_texture()->get_height()));
+		Log.print("Saving palettized texture to '%s' %dx%d (%d colors x %d rows)...",
+				  index_filename,
+				  pal_img->get_index_texture()->get_width(),
+				  pal_img->get_index_texture()->get_height(),
+				  pal_img->get_palette_texture()->get_width(),
+				  pal_img->get_palette_texture()->get_height());
 		auto* resource_saver = ResourceSaver::get_singleton();
 		if (auto error = resource_saver->save(pal_img, index_filename); error != Error::OK)
 		{
-			print_error(vformat("PalettizedImageImportPlugin: failed to save '%s'. %d", index_filename, int(error)));
+			Log.print_error("PalettizedImageImportPlugin: failed to save '%s'. %d", index_filename, int(error));
 			return error;
 		}
 		/*
@@ -121,15 +121,15 @@ namespace experimental
 
 				if (auto error = resource_saver->save(pal_img->get_index_texture()); error != Error::OK)
 				{
-					print_error(vformat("PalettizedImageImportPlugin: failed to save '%s'. %d", index_filename, int(error)));
+					Log.print_error("PalettizedImageImportPlugin: failed to save '%s'. %d", index_filename, int(error));
 					return error;
 				}
 
 				auto palette_filename = vformat("%s.palette", p_save_path);
-				// print_line(vformat("Saving palette texture to '%s'...", palette_filename));
+				// Log.print("Saving palette texture to '%s'...", palette_filename);
 				if (auto error = resource_saver->save(pal_img->get_palette_texture(), vformat("%s_palette.res", p_save_path)); error != Error::OK)
 				{
-					print_error(vformat("PalettizedImageImportPlugin: failed to save '%s'. %d", palette_filename, int(error)));
+					Log.print_error("PalettizedImageImportPlugin: failed to save '%s'. %d", palette_filename, int(error));
 					return error;
 				}
 				auto& gen_files = reinterpret_cast<PackedStringArray&>(const_cast<TypedArray<String>&>(p_gen_files));

@@ -1,5 +1,6 @@
 #include "palettized_png_loader.hpp"
 
+#include "../helpers/logger.hpp"
 #include "../helpers/read_bytes_stream.hpp"
 
 #include <godot_cpp/classes/file_access.hpp>
@@ -18,6 +19,7 @@ namespace experimental
 {
 	static constexpr unsigned char PNGIdentifier[8] = { 137, 80, 78, 71, 13, 10, 26, 10 };
 	using ChunkStreamMap = std::map<godot::String, ReadBytesStream>;
+	static Logger<true> Log{ "PalPNGLoader" };
 
 	// bit 0: 0 - no palette, 1 - palette
 	// bit 1: 0 - grayscale, 1 - color
@@ -97,7 +99,7 @@ namespace experimental
 			PackedByteArray bytes = FileAccess::get_file_as_bytes(filename);
 			if (bytes.size() <= sizeof(PNGIdentifier) || memcmp(bytes.ptr(), PNGIdentifier, sizeof(PNGIdentifier)) != 0)
 			{
-				print_error(vformat("PNG identifier sequence not found in file \"%s\"!", filename));
+				Log.print_error("PNG identifier sequence not found in file \"%s\"!", filename);
 				return {};
 			}
 
@@ -144,7 +146,7 @@ namespace experimental
 			// {
 			// 	auto srgbData = srgbChunkIt->second;
 			// 	uint8_t renderingIntent = srgbData.ReadInt8();
-			// 	print_line(vformat("sRGB chunk: renderingIntent=%d", renderingIntent));
+			// 	Log.print("sRGB chunk: renderingIntent=%d", renderingIntent);
 			// }
 
 			PackedByteArray palette;
@@ -222,7 +224,7 @@ namespace experimental
 			}
 			if (!errors.is_empty())
 			{
-				print_error(vformat("Errors found while loading PNG file \"%s\":\n%s", filename, String{ "\n" }.join(errors)));
+				Log.print_error("Errors found while loading PNG file \"%s\":\n%s", filename, String{ "\n" }.join(errors));
 				return {};
 			}
 

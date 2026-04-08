@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../helpers/logger.hpp"
 #include <godot_cpp/classes/resource_format_loader.hpp>
 
 namespace experimental
@@ -7,6 +8,9 @@ namespace experimental
 	class PalettizedImageLoader : public godot::ResourceFormatLoader
 	{
 		GDCLASS(PalettizedImageLoader, godot::ResourceFormatLoader);
+
+		inline static Logger<true> Log{ "PalImgLoader" };
+
 	protected:
 		static void _bind_methods() {}
 

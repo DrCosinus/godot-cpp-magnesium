@@ -20,14 +20,14 @@ namespace experimental
 
 	bool PalettizedImageLoader::_handles_type(const StringName& p_type) const
 	{
-		// print_line(vformat("PalettizedImageLoader::_handles_type: checking if '%s' is a type we handle", p_type));
+		// Log.print("_handles_type: checking if '%s' is a type we handle", p_type);
 		static StringName expected_type{ "PalettizedImage" };
 		return p_type == expected_type;
 	}
 
 	Variant PalettizedImageLoader::_load(const String& p_path, const String& p_original_path, bool p_use_sub_threads, int32_t p_cache_mode) const
 	{
-		print_line(vformat("[PILoader] PalettizedImageLoader::_load: loading resource from '%s' (original path: '%s')", p_path, p_original_path));
+		Log.print("PalettizedImageLoader::_load: loading resource from '%s' (original path: '%s')", p_path, p_original_path);
 		// for now we ignore the original path, since we don't have any dependencies to worry about. We can use it later if we want to support loading from a source file (e.g. PNG) instead of a .res file.
 		(void)p_original_path;
 
@@ -36,10 +36,10 @@ namespace experimental
 
 		auto imgpal = Ref<PalettizedImage>(memnew(PalettizedImage));
 		imgpal->serialize(stream);
-		print_line(vformat("[PILoader] Finished loading palettized image from '%s' %dx%d (%d colors x %d palettes)", p_path, imgpal->get_index_texture().is_null() ? -1 : imgpal->get_index_texture()->get_width(),
-						   imgpal->get_index_texture().is_null() ? -1 : imgpal->get_index_texture()->get_height(),
-						   imgpal->get_palette_texture().is_null() ? -1 : imgpal->get_palette_texture()->get_width(),
-						   imgpal->get_palette_texture().is_null() ? -1 : imgpal->get_palette_texture()->get_height()));
+		Log.print("Finished loading palettized image from '%s' %dx%d (%d colors x %d palettes)", p_path, imgpal->get_index_texture().is_null() ? -1 : imgpal->get_index_texture()->get_width(),
+				  imgpal->get_index_texture().is_null() ? -1 : imgpal->get_index_texture()->get_height(),
+				  imgpal->get_palette_texture().is_null() ? -1 : imgpal->get_palette_texture()->get_width(),
+				  imgpal->get_palette_texture().is_null() ? -1 : imgpal->get_palette_texture()->get_height());
 		return imgpal;
 	}
 } //namespace experimental

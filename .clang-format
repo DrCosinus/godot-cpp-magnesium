@@ -26,7 +26,7 @@ AllowShortFunctionsOnASingleLine: All
 # AlwaysBreakAfterDefinitionReturnType: None
 # AlwaysBreakAfterReturnType: None
 # AlwaysBreakBeforeMultilineStrings: false
-# AlwaysBreakTemplateDeclarations: MultiLine
+BreakTemplateDeclarations: Leave
 # AttributeMacros:
 #   - __capability
 # BinPackArguments: true

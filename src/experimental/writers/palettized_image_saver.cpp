@@ -22,13 +22,13 @@ namespace experimental
 
 	bool PalettizedImageSaver::_recognize(const Ref<Resource>& p_resource) const
 	{
-		// print_line("PalettizedImageSaver::_recognize called");
+		Log.print("PalettizedImageSaver::_recognize called");
 		return Object::cast_to<PalettizedImage>(p_resource.ptr()) != nullptr;
 	}
 
 	Error PalettizedImageSaver::_save(const Ref<Resource>& p_resource, const String& p_path, uint32_t p_flags)
 	{
-		// print_line(vformat("Saving palettized image to %s", p_path));
+		Log.print("PalettizedImageSaver::_save called for path: %s", p_path);
 		auto pal_img = Object::cast_to<PalettizedImage>(p_resource.ptr());
 		if (pal_img == nullptr)
 		{
@@ -47,7 +47,7 @@ namespace experimental
 		}
 
 		file->store_buffer(buffer);
-		print_line(vformat("Finished saving palettized image to %s", p_path));
+		Log.print("PalettizedImageSaver::_save finished saving palettized image to %s", p_path);
 		return Error::OK;
 	}
 } //namespace experimental

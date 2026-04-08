@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../helpers/logger.hpp"
 #include "../helpers/serializer.hpp"
 
 #include <godot_cpp/classes/image_texture.hpp>
@@ -13,6 +14,9 @@ namespace experimental
 	struct PalettizedImage : public godot::Resource, public Serializable
 	{
 		GDCLASS(PalettizedImage, godot::Resource)
+
+		Logger<true> Log{ "PalImg" };
+
 	protected:
 		static void _bind_methods() {}
 
@@ -75,7 +79,7 @@ namespace experimental
 
 			if (!serializer.IsWriting())
 			{
-				print_line(godot::vformat("Deserialized palettized image: %dx%d, palette size: %dx%d", width, height, palette_size, palette_count));
+				Log.print("Deserialized palettized image: %dx%d, palette size: %dx%d", width, height, palette_size, palette_count);
 				if (width > 0 && height > 0 && !index_data.is_empty())
 				{
 					index_texture = godot::ImageTexture::create_from_image(godot::Image::create_from_data(width, height, false, godot::Image::FORMAT_L8, index_data));

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../helpers/logger.hpp"
 #include <godot_cpp/classes/editor_plugin.hpp>
 
 namespace experimental
@@ -7,6 +8,8 @@ namespace experimental
 	class PalettizedImageEditorPlugin : public godot::EditorPlugin
 	{
 		GDCLASS(PalettizedImageEditorPlugin, EditorPlugin);
+
+		inline static Logger<true> Log{ "PalImgEditorPlugin" };
 
 	protected:
 		static void _bind_methods()

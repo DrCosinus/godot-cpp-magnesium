@@ -11,19 +11,16 @@ using namespace godot;
 
 namespace experimental
 {
-	//ENABLE_LOG(PalettizedMaterial);
-	using Log = Logger<PalettizedMaterial>;
-
 	void PalettizedMaterial::init_shaders()
 	{
 		// create shader and material
-		Log::print("PalettizedMaterial::init_shaders: creating shader and material");
+		Log.print("PalettizedMaterial::init_shaders: creating shader and material");
 	}
 
 	void PalettizedMaterial::finish_shaders()
 	{
 		// free shader and material
-		Log::print("PalettizedMaterial::finish_shaders: freeing shader and material");
+		Log.print("PalettizedMaterial::finish_shaders: freeing shader and material");
 	}
 
 	void PalettizedMaterial::_bind_methods()
@@ -65,12 +62,12 @@ namespace experimental
 
 		if (shader_map.has(current_key))
 		{
-			Log::print("PalettizedMaterial::update_shader: current shader users before decrement: %d", shader_map[current_key].users);
+			Log.print("PalettizedMaterial::update_shader: current shader users before decrement: %d", shader_map[current_key].users);
 			shader_map[current_key].users--;
 			if (shader_map[current_key].users <= 0)
 			{
 				// free shader
-				Log::print("PalettizedMaterial::update_shader: freeing shader for key: %d", current_key.key);
+				Log.print("PalettizedMaterial::update_shader: freeing shader for key: %d", current_key.key);
 				RenderingServer::get_singleton()->free_rid(shader_map[current_key].shader);
 				shader_map.erase(current_key);
 			}
@@ -80,7 +77,7 @@ namespace experimental
 
 		if (shader_map.has(mk))
 		{
-			Log::print("PalettizedMaterial::update_shader: reusing existing shader for key: %d", current_key.key);
+			Log.print("PalettizedMaterial::update_shader: reusing existing shader for key: %d", current_key.key);
 			RenderingServer::get_singleton()->material_set_shader(material_rid, shader_map[mk].shader);
 			shader_map[mk].users++;
 			return;
@@ -109,7 +106,7 @@ void fragment() {
 }
 )";
 
-		Log::print("PalettizedMaterial::update_shader: creating new shader for key: %d", current_key.key);
+		Log.print("PalettizedMaterial::update_shader: creating new shader for key: %d", current_key.key);
 		ShaderData sd;
 		sd.shader = RenderingServer::get_singleton()->shader_create();
 		sd.users = 1;
@@ -124,8 +121,7 @@ void fragment() {
 		if (palettized_image.is_null())
 			return;
 		// set textures to shader parameters
-		Variant
-		print_line("PalettizedMaterial::set_palettized_image: setting index and palette textures to material");
+		Log.print("PalettizedMaterial::set_palettized_image: setting index and palette textures to material");
 		RenderingServer::get_singleton()->material_set_param(get_rid(), "index_tex", palettized_image->get_index_texture()->get_rid());
 		RenderingServer::get_singleton()->material_set_param(get_rid(), "palette_tex", palettized_image->get_palette_texture()->get_rid());
 	}
