@@ -52,7 +52,7 @@ namespace experimental
 
 	void register_scene_types()
 	{
-		print_line("--- Experimental scenetypes registered ---");
+		print_line("--- Experimental scene types registered ---");
 
 		GDREGISTER_CLASS(PalettizedMaterial);
 		GDREGISTER_CLASS(PalettizedImage);
@@ -62,5 +62,9 @@ namespace experimental
 
 	void unregister_scene_types()
 	{
+		print_line("--- Experimental scene types unregistered ---");
+		PalettizedMaterial::finish_shaders();
+
+		// No need to unregister individual classes, as Godot will handle that when the library is unloaded.
 	}
 } //namespace experimental

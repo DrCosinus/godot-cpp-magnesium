@@ -21,6 +21,12 @@ namespace experimental
 	{
 		// free shader and material
 		Log.print("PalettizedMaterial::finish_shaders: freeing shader and material");
+		for (const auto& pair : shader_map)
+		{
+			Log.print("PalettizedMaterial::finish_shaders: freeing shader for key: %d", pair.key.key);
+			RenderingServer::get_singleton()->free_rid(pair.value.shader);
+		}
+		shader_map.clear();
 	}
 
 	void PalettizedMaterial::_bind_methods()

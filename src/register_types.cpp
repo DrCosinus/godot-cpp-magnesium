@@ -47,7 +47,7 @@ void uninitialize_gdextension_types(ModuleInitializationLevel p_level)
 		default:
 			break;
 	}
-
+	print_line(vformat("GDExtension types uninitialized at level: %d.", p_level));
 }
 
 extern "C"

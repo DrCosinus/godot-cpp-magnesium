@@ -1,7 +1,7 @@
 #pragma once
 
-// #include "string_literal.hpp"
 #include <godot_cpp/variant/string.hpp>
+#include <godot_cpp/variant/utility_functions.hpp>
 
 namespace experimental
 {
@@ -20,7 +20,7 @@ namespace experimental
 				{
 					message = vformat("[%s]: %s", prefix, message);
 				}
-				print_line(vformat(message, args...));
+				UtilityFunctions::print(vformat(message, args...));
 			}
 		}
 
@@ -33,7 +33,7 @@ namespace experimental
 				{
 					message = vformat("[%s][ERROR]: %s", prefix, message);
 				}
-				print_error(vformat(message, args...));
+				UtilityFunctions::printerr(vformat(message, args...));
 			}
 		}
 	};
