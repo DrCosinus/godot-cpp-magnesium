@@ -39,26 +39,14 @@ namespace experimental
 		float palette_offset{ 0.0f };
 		float palette_speed{ 0.0f };
 
-		// godot::RID shader_rid;
-		// godot::RID material_rid;
-
 		void update_shader();
 
 	public:
 		PalettizedMaterial();
 		~PalettizedMaterial() override = default;
 
-		// godot::RID _get_shader_rid() const override
-		// {
-		// 	return shader_material->get_shader()->get_rid();
-		// }
+		void _validate_property(godot::PropertyInfo &p_property) const;
 
-		// godot::RID _get_rid() const override
-		// {
-		// 	return shader_material->get_rid();
-		// }
-
-		// GDVIRTUAL0RC(godot::Shader::Mode, _get_shader_mode);
 		godot::Shader::Mode _get_shader_mode() const override
 		{
 			return godot::Shader::MODE_CANVAS_ITEM;

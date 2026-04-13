@@ -103,40 +103,32 @@ namespace experimental
 			return Error::FAILED;
 		}
 
-		auto index_filename = vformat("%s.%s", p_save_path, _get_save_extension());
-		Log.print("Saving palettized texture to '%s' %dx%d (%d colors x %d rows)...",
-				  index_filename,
-				  pal_img->get_index_texture()->get_width(),
-				  pal_img->get_index_texture()->get_height(),
-				  pal_img->get_palette_texture()->get_width(),
-				  pal_img->get_palette_texture()->get_height());
-		auto* resource_saver = ResourceSaver::get_singleton();
-		if (auto error = resource_saver->save(pal_img, index_filename); error != Error::OK)
+		auto& RS = *ResourceSaver::get_singleton();
 		{
-			Log.print_error("PalettizedImageImportPlugin: failed to save '%s'. %d", index_filename, int(error));
-			return error;
+			auto palimg_filename = vformat("%s.%s", p_save_path, _get_save_extension());
+			Log.print("Saving palettized texture to '%s' %dx%d (%d colors x %d rows)...",
+					  palimg_filename,
+					  pal_img->get_index_texture()->get_width(),
+					  pal_img->get_index_texture()->get_height(),
+					  pal_img->get_palette_texture()->get_width(),
+					  pal_img->get_palette_texture()->get_height());
+			if (auto error = RS.save(pal_img, palimg_filename); error != Error::OK)
+			{
+				Log.print_error("Failed to save '%s'. %d", palimg_filename, int(error));
+				return error;
+			}
 		}
-		/*
-				pal_img->get_index_texture()->set_path(index_filename);
 
-				if (auto error = resource_saver->save(pal_img->get_index_texture()); error != Error::OK)
-				{
-					Log.print_error("PalettizedImageImportPlugin: failed to save '%s'. %d", index_filename, int(error));
-					return error;
-				}
-
-				auto palette_filename = vformat("%s.palette", p_save_path);
-				// Log.print("Saving palette texture to '%s'...", palette_filename);
-				if (auto error = resource_saver->save(pal_img->get_palette_texture(), vformat("%s_palette.res", p_save_path)); error != Error::OK)
-				{
-					Log.print_error("PalettizedImageImportPlugin: failed to save '%s'. %d", palette_filename, int(error));
-					return error;
-				}
-				auto& gen_files = reinterpret_cast<PackedStringArray&>(const_cast<TypedArray<String>&>(p_gen_files));
-				gen_files.clear();
-				// gen_files.append(index_filename);
-				gen_files.append(palette_filename);
-		*/
+		// test meta
+		{
+			auto idxtex_filename = vformat("%s.%s", p_save_path, "tres");
+			pal_img->get_index_texture()->set_meta("palette", pal_img->get_palette_texture());
+			if (auto error = RS.save(pal_img->get_index_texture(), idxtex_filename); error != Error::OK)
+			{
+				Log.print_error("Failed to save '%s'. %d", idxtex_filename, int(error));
+				return error;
+			}
+		}
 		return Error::OK;
 	}
 
