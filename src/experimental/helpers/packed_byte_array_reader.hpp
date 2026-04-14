@@ -7,7 +7,6 @@
 namespace experimental
 {
 	struct PackedByteArrayReader;
-	// ENABLE_LOG_WITH_PREFIX(PackedByteArrayReader, "PBAReader");
 
 	struct PackedByteArrayReader : public Serializer
 	{
@@ -17,35 +16,27 @@ namespace experimental
 
 		bool ProcessInt8(godot::StringName name, int8_t& value) override
 		{
-			// name is ignored for now since our WriteBytesStream doesn't
-			// support named fields, but we include it in the interface in
-			// case we want to add support for it later
 			(void)name;
 			if (stream.size() < 1)
 			{
 				Log.print("Not enough data in stream to read Int8: %s, expected 1 byte, actual size: %d", name, stream.size());
 				return false;
 			}
-			value = static_cast<int8_t>(stream[0]);
-			Log.print("Read Int8: %s = %d", name, value);
-			stream.remove_at(0);
+			value = NextByte();
+			// Log.print("Read Int8: %s = %d", name, value);
 			return true; // return true if the value was successfully read
 		}
 
 		bool ProcessInt16(godot::StringName name, int16_t& value) override
 		{
 			(void)name;
-			// endianess: we will write in big-endian format (most significant
-			// byte first) regardless of the platform's native endianess, to
-			// ensure consistent serialization across platforms
 			if (stream.size() < 2)
 			{
 				Log.print("Not enough data in stream to read Int16: %s, expected 2 bytes, actual size: %d", name, stream.size());
 				return false;
 			}
-			value = (static_cast<int16_t>(stream[0]) << 8) | static_cast<int16_t>(stream[1]);
-			Log.print("Read Int16: %s = %d", name, value);
-			stream = stream.slice(2); // remove the first 2 bytes that we just read
+			value = (NextByte<int16_t>() << 8) | NextByte<int16_t>();
+			// Log.print("Read Int16: %s = %d", name, value);
 			return true;
 		}
 
@@ -57,12 +48,9 @@ namespace experimental
 				Log.print("Not enough data in stream to read Int32: %s, expected 4 bytes, actual size: %d", name, stream.size());
 				return false;
 			}
-			value = (static_cast<int32_t>(stream[0]) << 24) |
-					(static_cast<int32_t>(stream[1]) << 16) |
-					(static_cast<int32_t>(stream[2]) << 8) |
-					static_cast<int32_t>(stream[3]);
-			Log.print("Read Int32: %s = %d", name, value);
-			stream = stream.slice(4); // remove the first 4 bytes that we just read
+			value = (NextByte<int32_t>() << 24) | (NextByte<int32_t>() << 16) | (NextByte<int32_t>() << 8) | NextByte<int32_t>();
+			// Log.print("Read Int32: %s = %d", name, value);
+
 			return true;
 		}
 
@@ -74,23 +62,16 @@ namespace experimental
 				Log.print("Not enough data in stream to read Int64: %s, expected 8 bytes, actual size: %d", name, stream.size());
 				return false;
 			}
-			value = (static_cast<int64_t>(stream[0]) << 56) |
-					(static_cast<int64_t>(stream[1]) << 48) |
-					(static_cast<int64_t>(stream[2]) << 40) |
-					(static_cast<int64_t>(stream[3]) << 32) |
-					(static_cast<int64_t>(stream[4]) << 24) |
-					(static_cast<int64_t>(stream[5]) << 16) |
-					(static_cast<int64_t>(stream[6]) << 8) |
-					static_cast<int64_t>(stream[7]);
-			Log.print("Read Int64: %s = %d", name, value);
-			stream = stream.slice(8); // remove the first 8 bytes that we just read
+			value = (NextByte<int64_t>() << 56) | (NextByte<int64_t>() << 48) | (NextByte<int64_t>() << 40) | (NextByte<int64_t>() << 32) |
+					(NextByte<int64_t>() << 24) | (NextByte<int64_t>() << 16) | (NextByte<int64_t>() << 8) | NextByte<int64_t>();
+			// Log.print("Read Int64: %s = %d", name, value);
 			return true;
 		}
 
 		bool ProcessPackedByteArray(godot::StringName name, godot::PackedByteArray& value, size_t& size) override
 		{
 			(void)name;
-			Log.print("Read PackedByteArray: %s, expected size: %d", name, size);
+			// Log.print("Read PackedByteArray: %s, expected size: %d", name, size);
 			if (size < 0)
 				size = value.size(); // if size is not provided, we will read the size from the provided value array
 
@@ -99,16 +80,31 @@ namespace experimental
 				Log.print("Not enough data in stream to read PackedByteArray: %s, expected size: %d, actual size: %d", name, size, stream.size());
 				return false;
 			}
-			Log.print("Reading PackedByteArray: %s, size: %d from stream (remaining: %d)", name, size, stream.size());
+			// Log.print("Reading PackedByteArray: %s, size: %d from stream (remaining: %d)", name, size, stream.size());
 			value.resize(size);
 			memcpy(value.ptrw(), stream.ptr(), size);
-			Log.print("Read PackedByteArray `%s`, first byte: %02X", name, value.size() > 0 ? value[0] : -1);
+			// Log.print("Read PackedByteArray `%s`, first byte: %02X", name, value.size() > 0 ? value[0] : -1);
 			stream = stream.slice(size);
-			Log.print("Remaining stream size after reading PackedByteArray `%s`: %d", name, stream.size());
+			// Log.print("Remaining stream size after reading PackedByteArray `%s`: %d", name, stream.size());
 			return true;
 		}
 
 	private:
+		int64_t RemainingSize() const { return stream.size() - index; }
+		template <typename T = int8_t>
+		T NextByte()
+		{
+			if (index >= stream.size())
+			{
+				Log.print_error("No more data in stream to read next byte, index: %d, stream size: %d", index, stream.size());
+				return static_cast<T>(-1);
+			}
+			int8_t byte = static_cast<int8_t>(stream[index]);
+			//Log.print("Read next byte from stream: %02X at index: %d", byte, index);
+			index++;
+			return static_cast<T>(byte);
+		}
+		int64_t index{ 0 };
 		godot::PackedByteArray& stream;
 	};
 } //namespace experimental

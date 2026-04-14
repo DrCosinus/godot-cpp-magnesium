@@ -26,30 +26,6 @@ namespace experimental
 
 		virtual bool ProcessPackedByteArray(godot::StringName name, godot::PackedByteArray& value, size_t& size) = 0;
 
-		// virtual bool ProcessImpl(const SerializerDataType& data_type, void* value_ptr, const char* metadata = nullptr);
-
-		// bool Process(const SerializerDataType& data_type, void* value_ptr, const char* metadata = nullptr)
-		// {
-		// 	const bool changed = ProcessImpl(data_type, value_ptr, metadata);
-		// 	DEV_ASSERT(!changed || is_writing, "Deserialization should not modify values");
-		// 	return changed;
-		// }
-
-		// template <typename T>
-		// bool Process(T& value, const char* metadata = nullptr)
-		// {
-		// 	return Process(GetSerializerDataType<T>::Get(), &value, metadata);
-		// }
-
-		// template <>
-		// bool Process<int8_t>(int8_t& value) { return ProcessInt8(value); }
-		// template <>
-		// bool Process<int16_t>(int16_t& value) { return ProcessInt16(value); }
-		// template <>
-		// bool Process<int32_t>(int32_t& value) { return ProcessInt32(value); }
-		// template <>
-		// bool Process<int64_t>(int64_t& value) { return ProcessInt64(value); }
-
 	protected:
 		bool is_writing;
 	};

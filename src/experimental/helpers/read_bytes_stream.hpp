@@ -50,32 +50,6 @@ namespace experimental
 			ERR_FAIL_COND(pos + count > len);
 			pos += count;
 		}
-		// template <typename T>
-		// T read()
-		// {
-		// 	ERR_FAIL_COND_V(pos + sizeof(T) > len, T{});
-		// 	T value;
-		// 	memcpy(&value, data + pos, sizeof(T));
-		// 	pos += sizeof(T);
-		// 	return value;
-		// }
-		// template <>
-		// int32_t read<int32_t>()
-		// {
-		// 	return ReadInt32();
-		// }
-		// template <>
-		// uint8_t read<uint8_t>()
-		// {
-		// 	return ReadInt8();
-		// }
-		// template <>
-		// godot::String read<godot::String>()
-		// {
-		// 	// for now we assume strings are prefixed with a 32-bit length. We can add support for other encodings later if needed.
-		// 	int32_t length = read<int32_t>();
-		// 	return ReadString(length);
-		// }
 		int32_t ReadInt32()
 		{
 			ERR_FAIL_COND_V(pos + 4 > len, 0);

@@ -5,16 +5,12 @@
 
 namespace experimental
 {
-	// PackedByteArrayWriter
 	struct WriteStreamSerializer : public Serializer
 	{
 		WriteStreamSerializer(godot::PackedByteArray& stream) : Serializer{ true }, stream{ stream } {}
 
 		bool ProcessInt8(godot::StringName name, int8_t& value) override
 		{
-			// name is ignored for now since our WriteBytesStream doesn't
-			// support named fields, but we include it in the interface in
-			// case we want to add support for it later
 			(void)name;
 			stream.append(value);
 			return true; // return true if the value was successfully written
