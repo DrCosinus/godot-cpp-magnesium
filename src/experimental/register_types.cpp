@@ -7,6 +7,7 @@
 #include <godot_cpp/classes/resource_saver.hpp>
 #include <godot_cpp/core/class_db.hpp>
 
+#include "helpers/logger.hpp"
 #include "importers/palettized_image_importer.hpp"
 #include "plugins/palettized_image_editor_plugin.hpp"
 #include "readers/palettized_image_loader.hpp"
@@ -20,39 +21,49 @@ namespace experimental
 {
 	static Ref<PalettizedImageLoader> palettized_image_loader;
 	static Ref<PalettizedImageSaver> palettized_image_saver;
-	static Ref<PalettizedImageImporter> palettized_image_importer;
+
+	static Logger<true> Log{ "RegisterTypes" };
 
 	void register_editor_types()
 	{
-		print_line("--- Experimental editor types registered ---");
+		Log.print("--- Experimental editor types registered ---");
 
 		GDREGISTER_CLASS(PalettizedImageImporter);
 		GDREGISTER_CLASS(PalettizedImageEditorPlugin);
 
+		Log.print("Registering PalettizedImageLoader and PalettizedImageSaver as resource format loader/saver...");
+
 		EditorPlugins::add_by_type<PalettizedImageEditorPlugin>();
 
-		palettized_image_loader = memnew(PalettizedImageLoader);
+		Log.print("Instantiating PalettizedImageLoader and adding it to ResourceLoader...");
+
+		palettized_image_loader.instantiate();
 		ResourceLoader::get_singleton()->add_resource_format_loader(palettized_image_loader);
 
-		palettized_image_saver = memnew(PalettizedImageSaver);
+		Log.print("Instantiating PalettizedImageSaver and adding it to ResourceSaver...");
+
+		palettized_image_saver.instantiate();
 		ResourceSaver::get_singleton()->add_resource_format_saver(palettized_image_saver);
+
+		Log.print("Experimental editor types registered successfully.");
 	}
 
 	void unregister_editor_types()
 	{
-		print_line("--- Experimental editor types unregistered ---");
-		auto& resource_saver = *ResourceSaver::get_singleton();
-		resource_saver.remove_resource_format_saver(palettized_image_saver);
+		Log.print("--- Experimental editor types unregistered ---");
 
-		auto& resource_loader = *ResourceLoader::get_singleton();
-		resource_loader.remove_resource_format_loader(palettized_image_loader);
+		ResourceSaver::get_singleton()->remove_resource_format_saver(palettized_image_saver);
+		palettized_image_saver.unref();
+
+		ResourceLoader::get_singleton()->remove_resource_format_loader(palettized_image_loader);
+		palettized_image_loader.unref();
 
 		EditorPlugins::remove_by_type<PalettizedImageEditorPlugin>();
 	}
 
 	void register_scene_types()
 	{
-		print_line("--- Experimental scene types registered ---");
+		Log.print("--- Experimental scene types registered ---");
 
 		GDREGISTER_CLASS(PalettizedMaterial);
 		GDREGISTER_CLASS(PalettizedImage);
@@ -62,7 +73,7 @@ namespace experimental
 
 	void unregister_scene_types()
 	{
-		print_line("--- Experimental scene types unregistered ---");
+		Log.print("--- Experimental scene types unregistered ---");
 		// No need to unregister individual classes, as Godot will handle that when the library is unloaded.
 	}
 } //namespace experimental

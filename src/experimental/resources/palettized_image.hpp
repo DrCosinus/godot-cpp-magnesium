@@ -15,7 +15,7 @@ namespace experimental
 	{
 		GDCLASS(PalettizedImage, godot::Resource)
 
-		Logger<true> Log{ "PalImg" };
+		inline static Logger<false> Log{ "PalImg" };
 
 	protected:
 		static void _bind_methods() {}

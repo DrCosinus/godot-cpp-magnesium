@@ -9,7 +9,7 @@ namespace experimental
 	{
 		GDCLASS(PalettizedImageImporter, EditorImportPlugin);
 
-		inline static Logger<true> Log{ "PalImgImporter" };
+		inline static Logger<false> Log{ "PalImgImporter" };
 
 	protected:
 		static void _bind_methods() {}

@@ -1,7 +1,6 @@
 #include "palettized_image_loader.hpp"
 
 #include "../helpers/packed_byte_array_reader.hpp"
-// #include "../helpers/read_bytes_stream.hpp"
 #include "../resources/palettized_image.hpp"
 #include <godot_cpp/classes/file_access.hpp>
 #include <godot_cpp/variant/packed_byte_array.hpp>
@@ -20,7 +19,6 @@ namespace experimental
 
 	bool PalettizedImageLoader::_handles_type(const StringName& p_type) const
 	{
-		// Log.print("_handles_type: checking if '%s' is a type we handle", p_type);
 		static StringName expected_type{ "PalettizedImage" };
 		return p_type == expected_type;
 	}
@@ -34,9 +32,12 @@ namespace experimental
 		PackedByteArray bytes = FileAccess::get_file_as_bytes(p_path);
 		PackedByteArrayReader stream{ bytes };
 
-		auto imgpal = Ref<PalettizedImage>(memnew(PalettizedImage));
+		Ref<PalettizedImage> imgpal;
+		imgpal.instantiate();
 		imgpal->serialize(stream);
-		Log.print("Finished loading palettized image from '%s' %dx%d (%d colors x %d palettes)", p_path, imgpal->get_index_texture().is_null() ? -1 : imgpal->get_index_texture()->get_width(),
+		Log.print("Finished loading palettized image from '%s' %dx%d (%d colors x %d palettes)",
+				  p_path,
+				  imgpal->get_index_texture().is_null() ? -1 : imgpal->get_index_texture()->get_width(),
 				  imgpal->get_index_texture().is_null() ? -1 : imgpal->get_index_texture()->get_height(),
 				  imgpal->get_palette_texture().is_null() ? -1 : imgpal->get_palette_texture()->get_width(),
 				  imgpal->get_palette_texture().is_null() ? -1 : imgpal->get_palette_texture()->get_height());

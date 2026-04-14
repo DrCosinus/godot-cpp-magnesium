@@ -2,14 +2,17 @@
 
 #include "../helpers/logger.hpp"
 #include <godot_cpp/classes/editor_plugin.hpp>
+#include <godot_cpp/classes/ref.hpp>
 
 namespace experimental
 {
+	class PalettizedImageImporter;
+
 	class PalettizedImageEditorPlugin : public godot::EditorPlugin
 	{
 		GDCLASS(PalettizedImageEditorPlugin, EditorPlugin);
 
-		inline static Logger<true> Log{ "PalImgEditorPlugin" };
+		inline static Logger<false> Log{ "PalImgEditorPlugin" };
 
 	protected:
 		static void _bind_methods()
@@ -27,5 +30,8 @@ namespace experimental
 		}
 		void _enter_tree() override;
 		void _exit_tree() override;
+
+	private:
+		godot::Ref<PalettizedImageImporter> importer;
 	};
 } //namespace experimental
