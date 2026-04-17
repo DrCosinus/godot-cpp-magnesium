@@ -1,0 +1,171 @@
+Import('env')
+from SCons.Script import Action
+
+# Ensure official doctest header is present (fetch script will overwrite vendor/doctest.h)
+import os
+fetch_script = os.path.join('..', 'tools', 'fetch_doctest.py')
+if os.path.exists(fetch_script):
+    try:
+        # run the small fetcher to get official doctest.h into tests/vendor/
+        import subprocess, sys
+        subprocess.check_call([sys.executable, fetch_script])
+    except Exception:
+        pass
+
+# Discover all test sources in this directory named test_*.cpp
+test_src = []
+for f in os.listdir('.'):
+    if f.startswith('test_') and f.endswith('.cpp'):
+        test_src.append(f)
+
+# Build test programs using a cloned env to avoid pulling in unrelated build sources
+test_env = env.Clone()
+
+# Define a macro to enable test-only stubs in headers so tests don't require Godot runtime
+test_env.Append(CPPDEFINES=['EXPERIMENTAL_UNIT_TEST','TEST_USE_MOCK_GODOT_CPP'])
+
+# Ensure our test include mocks are first on the include path
+try:
+    test_env.Prepend(CPPPATH=[os.path.join('..', 'include')])
+except Exception:
+    pass
+
+# Avoid linking against the godot-cpp runtime or other project libs in test binaries
+try:
+    print('Original test_env LIBS:', test_env.get('LIBS'))
+    test_env.Replace(LIBS=[])
+    test_env.Replace(LIBPATH=[])
+except Exception:
+    pass
+
+# Add MSVC exception handling flags on Windows to avoid warning C4530 (only for tests)
+platform_name = ''
+try:
+    platform_name = str(env['platform'])
+except Exception:
+    pass
+if platform_name and 'windows' in platform_name.lower():
+    test_env.Append(CCFLAGS=['/EHsc'])
+
+# Prefer linking against prebuilt extension library if present to avoid rebuilding godot-cpp
+libname = 'Magnesium'
+suffix = test_env['suffix'].replace('.dev', '').replace('.universal', '') if 'suffix' in test_env else ''
+lib_filename = "{}{}{}{}".format(test_env.subst('$SHLIBPREFIX'), libname, suffix, test_env.subst('$SHLIBSUFFIX'))
+lib_dir = os.path.join('..', 'bin', test_env['platform']) if 'platform' in test_env else os.path.join('..', 'bin')
+lib_path = os.path.join(lib_dir, lib_filename)
+if os.path.exists(lib_path):
+    # Found a prebuilt extension library, but avoid linking it into test executables
+    # to prevent symbol conflicts (LNK1169). Keep the path for diagnostics only.
+    print('Found prebuilt extension library (not linking):', lib_path)
+
+# Put test binaries into a hidden build directory that should not be committed
+build_dir = os.path.join('..', '.build', 'tests', test_env['platform'] if 'platform' in test_env else 'host')
+if not os.path.exists(build_dir):
+    try:
+        os.makedirs(build_dir)
+    except Exception:
+        pass
+
+programs = []
+tests_to_run = []
+built_paths = {}
+for src in test_src:
+    base = os.path.splitext(src)[0]
+    target_path = os.path.join(build_dir, base)
+    prog_nodes = test_env.Program(target=target_path, source=src)
+    # keep node references for SCons
+    if isinstance(prog_nodes, (list, tuple)):
+        for n in prog_nodes:
+            programs.append(n)
+        first_node = prog_nodes[0] if len(prog_nodes) > 0 else None
+    else:
+        programs.append(prog_nodes)
+        first_node = prog_nodes
+    # record the expected built path from the node if available
+    built_path = None
+    if first_node is not None:
+        if hasattr(first_node, 'abspath'):
+            try:
+                built_path = str(first_node.abspath)
+            except Exception:
+                built_path = None
+        else:
+            try:
+                built_path = str(first_node)
+            except Exception:
+                built_path = None
+    if built_path:
+        built_paths[base] = built_path
+    tests_to_run.append(base)
+
+if programs:
+    env.Alias('test', programs)
+
+    def _run_tests(target, source, env):
+        import subprocess, sys, os
+        rc_all = 0
+        for base in tests_to_run:
+            prog = None
+            # Prefer the built node path recorded earlier
+            if base in built_paths:
+                candidate = built_paths[base]
+                # normalize candidate if it's a list/tuple or a stringified list
+                if isinstance(candidate, (list, tuple)) and len(candidate) > 0:
+                    candidate = candidate[0]
+                elif isinstance(candidate, str) and candidate.startswith('[') and candidate.endswith(']'):
+                    try:
+                        import ast
+                        parsed = ast.literal_eval(candidate)
+                        if isinstance(parsed, (list, tuple)) and len(parsed) > 0:
+                            candidate = parsed[0]
+                    except Exception:
+                        pass
+                print(' candidate path (sanitized):', candidate)
+                print(' exists?', os.path.exists(candidate))
+                if os.path.isfile(candidate):
+                    prog = candidate
+                else:
+                    # sometimes SCons node abspath points to a different extension; try glob fallback
+                    pass
+            if prog is None:
+                # fallback: glob for any matching file in build_dir
+                pattern = os.path.join(build_dir, base + '*')
+                try:
+                    import glob
+                    matches = glob.glob(pattern)
+                except Exception:
+                    matches = []
+                for m in matches:
+                    if os.path.isfile(m):
+                        prog = m
+                        break
+            if prog is None:
+                # diagnostic output to help locate mismatch between SCons target and FS
+                print('Executable not found for test base:', base)
+                print(' build_dir:', build_dir)
+                print(' built_paths entry:', built_paths.get(base))
+                try:
+                    print(' cwd:', os.getcwd())
+                except Exception:
+                    pass
+                try:
+                    print(' build_dir exists?', os.path.isdir(build_dir))
+                    print(' build_dir listing:', os.listdir(os.path.dirname(build_dir)) if os.path.exists(os.path.dirname(build_dir)) else [])
+                    import glob
+                    matches = glob.glob(os.path.join(build_dir, base + '*'))
+                    print(' glob matches:', matches)
+                except Exception as e:
+                    print(' glob/dir error:', e)
+                rc_all = 127
+                continue
+            print('Running test:', prog)
+            rc = subprocess.call([prog])
+            if rc != 0:
+                print('Test failed:', prog, 'code', rc)
+                rc_all = rc
+        if rc_all != 0:
+            sys.exit(rc_all)
+
+    env.AddPostAction(programs, Action(_run_tests))
+else:
+    print('No test_*.cpp files found in tests/cpp; nothing to build')

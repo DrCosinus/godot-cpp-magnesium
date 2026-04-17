@@ -72,4 +72,6 @@ library = env.SharedLibrary(
 copy = env.Install("{}/bin/{}/".format(projectdir, env["platform"]), library)
 
 default_args = [library, copy]
+# Include C++ unit tests SConscript (uses exported env)
+SConscript('tests/cpp/SConscript', exports={'env': env})
 Default(*default_args)
