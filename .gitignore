@@ -61,3 +61,6 @@ compile_commands.json
 # Cmake
 cmake-build*
 CMakeUserPresets.json
+
+# Ignore test build outputs (hidden build folder)
+.build/
