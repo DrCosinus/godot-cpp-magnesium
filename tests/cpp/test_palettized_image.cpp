@@ -13,7 +13,7 @@ TEST_CASE("palettized image roundtrip")
 	index_data[0] = (uint8_t)0;
 	index_data[1] = (uint8_t)1;
 	index_data[2] = (uint8_t)2;
-	index_data[3] = (uint8_t)3;
+	index_data[3] = (uint8_t)3; 
 
 	// create a 2x2 palette (RGBA) => 4 pixels * 4 = 16 bytes
 	godot::PackedByteArray palette_data;
